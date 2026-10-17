@@ -3,7 +3,8 @@
 !.env.example
 .DS_Store
 Thumbs.db
-node_modules/
 dist/
 coverage/
 *.log
+node_modules/
+build/
