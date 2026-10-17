@@ -17,21 +17,25 @@ scm/
 │   └── production-readiness.md
 ├── .env.example
 ├── .gitignore
-├── index.html
+├── vercel.json
 └── README.md
 ```
 
-There is no backend or database in this prototype. Browser `localStorage` is demonstration storage only and is not suitable for confidential data or multiple users. The source workspace itself is the `scm/` project root.
+There is no backend or database in this prototype. Browser `localStorage` is demonstration storage only and is not suitable for confidential data or multiple users. The source workspace itself is the `scm/` project root. The static entry point is `frontend/index.html`.
 
 ## Run locally
 
-The frontend is dependency-free. Open `index.html` in a modern browser, or serve this folder with any static HTTP server. For example, with Python already installed:
+The frontend is dependency-free. Open `frontend/index.html` in a modern browser, or serve this folder with any static HTTP server. For example, with Python already installed:
 
 ```powershell
 py -m http.server 8000
 ```
 
-Then open <http://localhost:8000>. No Node.js install, build step, account, API key or cloud service is needed for this demo. The external hero photo and web fonts need an internet connection; the layout and workflows remain usable if those assets cannot load.
+Then open <http://localhost:8000/frontend/>. No Node.js install, build step, account, API key or cloud service is needed for this demo. The external hero photo and web fonts need an internet connection; the layout and workflows remain usable if those assets cannot load.
+
+## Deploy to Vercel
+
+Import the Git repository with the repository root (`.`) as the project root. The root `vercel.json` sets `frontend` as the static output directory. Use the **Other** framework preset and leave build and install commands empty. Vercel will serve `frontend/index.html` and its sibling CSS and JavaScript files without a build step. Do not set the project root to `frontend` while retaining this root config, because the output directory is relative to the project root. The static demo needs no environment variables.
 
 ## Try the workflow
 
