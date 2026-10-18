@@ -13,6 +13,7 @@
                 tagline: 'Control tower',
                 views: [
                     ['overview', 'Overview'],
+                    ['enquiries', 'Enquiries'],
                     ['collections', 'Collections'],
                     ['facility', 'Facility intake'],
                     ['processing', 'Processing & QC'],
@@ -111,7 +112,7 @@
         <section class="impact-section" id="impact"><div class="section-wrap"><div class="section-kicker">MEASURE WHAT IS VERIFIED <span>04 — 05</span></div><div class="impact-header"><h2>Transparent by design.</h2><span class="period-tag">DEMONSTRATION DATA ONLY</span></div><p class="impact-copy">Illustrative workflow totals from fictional demo records. These figures do not represent project activity or environmental impact.</p><div class="impact-metrics"><div><small>Pickup quantities recorded</small><strong>${kg(collected)}</strong><span>Demo records · reported weight</span></div><div><small>Quality-approved output</small><strong>${kg(approved)}</strong><span>Demo records · measured output</span></div><div><small>Confirmed accepted</small><strong>${kg(s.shipments.filter(x => x.status === 'Receipt Confirmed').reduce((n, x) => n + (x.receivedKg || 0), 0))}</strong><span>Demo records · partner-confirmed</span></div><div><small>Verified participation</small><strong>—</strong><span>No verified data available</span></div></div></div></section>
         <section class="resources-section section-wrap" id="resources"><div class="section-kicker">RESOURCES <span>05 — 05</span></div><div class="resource-row"><div><span class="mini-label">METHODOLOGY & REPORTING</span><h2>Evidence before claims.</h2></div><div><p>Reports, measurement definitions and educational resources will be published as they become available. No project reports have been added yet.</p><span class="empty-inline">No resources available</span></div></div></section>
         <section class="faq-section section-wrap" id="faq"><div class="section-kicker">PRACTICAL QUESTIONS <span>POLICIES</span></div><div class="faq-grid"><div><span class="mini-label">FAQ & RESPONSIBILITY</span><h2>Clear expectations<br>at every handover.</h2><p>Project procedures and formal policies should be agreed with participating organisations before operations begin.</p></div><div class="faq-list"><details><summary>How are quantities verified?</summary><p>Collection reports and facility net weights are separate records. Differences require a note and review; processing output is divided into usable, rejected and loss quantities.</p></details><details><summary>Is vehicle location tracked?</summary><p>No live GPS or mapping integration is connected in this demonstration. A production deployment must obtain explicit driver consent, define authorised tracking periods and protect location history.</p></details><details><summary>What if a delivery quantity differs?</summary><p>The receiving partner records actual quantity and outcome. A difference remains disputed, creates an operations alert and is not counted as accepted stock.</p></details><details><summary>How is demo information handled?</summary><p>Sample workflow changes stay in this browser's local storage. Do not enter personal, confidential or real operational data. There is no account security or server-side access control.</p></details><details id="privacy"><summary>Privacy notice</summary><p>This prototype has no server-side collection, analytics, GPS or messaging integration. A production privacy notice must explain data use, retention, access, evidence storage, tracking consent and contact routes after those services are configured.</p></details><details id="terms"><summary>Terms and partner responsibilities</summary><p>These demo screens do not establish service, payment, safety, quality or dispute terms. Participating organisations should approve written procedures and obtain local legal review before use.</p></details></div></div></section>
-        <section class="contact-section" id="contact"><div class="section-wrap contact-grid"><div><span class="mini-label">WORK WITH THE NETWORK</span><h2>Have a role in the<br>material journey?</h2><p>Enquiries are welcome from floral-waste sources, transport providers, processing facilities and startups.</p></div><div class="contact-action"><span>Partnership enquiries</span><p>Tell us what you do and where you operate.</p>${button('Send an enquiry', 'contact', 'cream')}</div></div></section>
+        <section class="contact-section" id="contact"><div class="section-wrap contact-grid contact-grid-enquiry"><div><span class="mini-label">WORK WITH THE NETWORK</span><h2>Contribute floral waste<br>or submit an enquiry.</h2><p>Flower shops, temples, individuals and organisations can tell us about floral waste donations or sales, regular collection, partnerships, or another enquiry.</p><p>Share your contact details and, where relevant, the material, estimated quantity, location and collection frequency.</p></div><div class="contact-action"><form class="public-enquiry-form" data-form="contact" aria-describedby="enquiry-storage-notice enquiry-feedback"><h3>Contribution enquiry</h3><p class="enquiry-form-intro">Fields marked <i>*</i> are required.</p><div class="public-enquiry-fields"><label class="form-field"><span>Full name <i>*</i></span><input name="fullName" type="text" required minlength="2" maxlength="100" autocomplete="name" placeholder="Your full name"></label><label class="form-field"><span>Mobile number <i>*</i></span><input name="mobile" type="tel" required inputmode="tel" autocomplete="tel" maxlength="20" pattern="\\+?[0-9\\s\\(\\)\\.\\-]{7,20}" placeholder="+91 98765 43210"></label><label class="form-field"><span>Email address <i>*</i></span><input name="email" type="email" required maxlength="254" autocomplete="email" placeholder="you@example.in"></label><label class="form-field"><span>Organization / shop name</span><input name="organization" type="text" maxlength="120" autocomplete="organization" placeholder="Optional"></label><label class="form-field"><span>Stakeholder type <i>*</i></span><select name="stakeholderType" required><option value="">Choose one</option><option>Flower shopkeeper</option><option>Temple</option><option>Individual</option><option>Organization</option><option>Other</option></select></label><label class="form-field"><span>Purpose of enquiry <i>*</i></span><select name="purpose" required><option value="">Choose one</option><option>Donate floral waste</option><option>Sell floral waste</option><option>Arrange regular collection</option><option>Partner with Floral Circular</option><option>General enquiry</option></select></label><label class="form-field form-field-wide"><span>Floral waste details</span><textarea name="floralDetails" rows="3" maxlength="1000" placeholder="Optional: flower types, estimated quantity, location, collection frequency, handling needs"></textarea><small class="field-hint">Share only what is relevant; up to 1,000 characters.</small></label><label class="form-field form-field-wide"><span>Additional message</span><textarea name="message" rows="3" maxlength="2000" placeholder="Anything else you would like us to know?"></textarea></label></div><p class="enquiry-storage-notice" id="enquiry-storage-notice"><strong>Demonstration only:</strong> This site has no backend or secure database. Do not enter real personal or confidential information; submissions are stored only in this browser and are not shared with an operations team.</p><p class="enquiry-feedback" id="enquiry-feedback" role="status" aria-live="polite"></p><button class="button button-primary enquiry-submit" type="submit">Submit enquiry</button></form></div></div></section>
       </main>
       <footer class="public-footer"><a class="brand-lockup" href="#home">${icon}<span><strong>FLORAL CIRCULAR</strong><small>FROM OFFERING TO OPPORTUNITY</small></span></a><span>Coordination for a more accountable circular supply chain.</span><div><a href="#about">About</a><a href="#process">Process</a><a href="#faq">FAQ</a><a href="#privacy">Privacy</a><a href="#terms">Terms</a><button data-action="login">Portal login</button><a href="#contact">Contact</a></div><small class="footer-note">Demo interface · Sample data is fictional · Policies require local legal review</small></footer>`;
         }
@@ -206,6 +207,15 @@
     return `${pageHeading('EXCEPTIONS', 'Alerts & issues', 'Keep exception ownership and resolution visible. Resolving an alert does not erase the underlying event.')}${panel('Exception register', 'Fictional demo alerts', dataTable(['REFERENCE', 'ISSUE', 'SEVERITY', 'OWNER', 'STATUS', 'ACTION'], rows, 'No alerts. Exceptions will be recorded as workflows progress.'))}`;
   }
 
+  function enquiriesView() {
+    const rows = state().enquiries.map(item => {
+      const received = new Date(item.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+      const details = [item.floralDetails && `<p><strong>Floral waste details:</strong> ${esc(item.floralDetails)}</p>`, item.message && `<p><strong>Additional message:</strong> ${esc(item.message)}</p>`].filter(Boolean).join('');
+      return `<tr><td><strong>${esc(item.fullName)}</strong><small class="cell-sub">${esc(item.id)}</small><small class="cell-sub">${esc(item.mobile)}</small><small class="cell-sub">${esc(item.email)}</small>${item.organization ? `<small class="cell-sub">${esc(item.organization)}</small>` : ''}</td><td>${esc(item.stakeholderType)}</td><td>${esc(item.purpose)}</td><td>${details ? `<details class="enquiry-details"><summary>View details</summary>${details}</details>` : '—'}</td><td>${esc(received)}</td><td>${badge(item.status)}</td><td>${button('Update status', 'update-enquiry', 'small', `data-id="${esc(item.id)}"`)}</td></tr>`;
+    }).join('');
+    return `${pageHeading('PUBLIC CONTACT', 'Contribution enquiries', 'Review incoming demo submissions and update their status. Submissions are stored only in this browser; this is not a secure shared operations inbox.')}${panel('All enquiries', 'Contact details and enquiry information are visible to anyone using this browser profile.', dataTable(['CONTACT', 'STAKEHOLDER', 'PURPOSE', 'MESSAGE / MATERIAL DETAILS', 'RECEIVED', 'STATUS', 'ACTION'], rows, 'No enquiries submitted yet.'))}<p class="footnote">This prototype has no authenticated operations access or server-side database. Do not use it for real personal information.</p>`;
+  }
+
   function reportsView() {
     const s = state();
     const input = s.batches.reduce((sum, x) => sum + x.inputKg, 0);
@@ -260,13 +270,13 @@
 
   function workspace() {
     const current = roles[role];
-    const content = role === 'operations' ? ({ overview: operationsOverview, collections: collectionsView, facility: facilityView, processing: processingView, inventory: inventoryView, shipments: shipmentsView, alerts: alertsView, reports: reportsView }[view] || operationsOverview)() : role === 'vendor' ? vendorView() : startupView();
+    const content = role === 'operations' ? ({ overview: operationsOverview, enquiries: enquiriesView, collections: collectionsView, facility: facilityView, processing: processingView, inventory: inventoryView, shipments: shipmentsView, alerts: alertsView, reports: reportsView }[view] || operationsOverview)() : role === 'vendor' ? vendorView() : startupView();
     const unread = state().alerts.filter(x => x.status !== 'Resolved').length;
-    app.innerHTML = `<div class="workspace"><aside class="sidebar"><a href="#" class="sidebar-brand" data-action="home">${icon}<span><strong>FLORAL<br>CIRCULAR</strong><small>DEMO CONTROL TOWER</small></span></a><div class="sidebar-org"><span class="org-avatar">${current.initials}</span><div><strong>${current.title}</strong><small>${current.tagline}</small></div><span class="org-chevron">⌄</span></div><nav class="side-nav" aria-label="Workspace navigation"><span class="nav-caption">WORKSPACE</span>${current.views.map(([key, label]) => `<button class="side-link ${view === key ? 'active' : ''}" data-view="${key}"><span class="side-glyph">${navGlyph(key)}</span>${label}${key === 'alerts' && unread ? `<i class="nav-count">${unread}</i>` : ''}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="demo-status"><span></span><div><b>DEMO ENVIRONMENT</b><small>Local browser data</small></div></div><button class="side-link" data-action="reset-demo"><span class="side-glyph">↻</span>Reset demo data</button><button class="side-link" data-action="logout"><span class="side-glyph">↗</span>Return to public site</button><div class="sidebar-foot">Floral Circular · Prototype<br>Not for operational use</div></div></aside><div class="workspace-main"><header class="topbar"><button class="icon-button sidebar-toggle" aria-label="Toggle navigation" data-action="sidebar-toggle">☰</button><div class="breadcrumb"><span>Floral Circular</span><b>/</b><strong>${esc(current.views.find(x => x[0] === view)?.[1] || 'Overview')}</strong></div><div class="topbar-right"><span class="top-date">Jammu <b>·</b> Demo dataset</span><button class="icon-button notification-button" aria-label="Open alerts" title="Open alerts" data-view="alerts">♧${unread ? `<i>${unread}</i>` : ''}</button><button class="profile-chip" data-action="switch-role"><span>${current.initials}</span><span class="profile-label">${current.title}<small>Demo role · not authenticated</small></span><b>⌄</b></button></div></header><main class="workspace-content"><div class="demo-banner"><span>DEMO</span><p>Fictional sample records are stored in this browser only. This role switch is not a secure login.</p><button data-action="about-demo" aria-label="About demo data">ⓘ</button></div><div class="view-content">${content}</div><footer class="workspace-footer">Demo preview · No live GPS, external messaging or production records connected <a href="#" data-action="about-demo">About this demo</a></footer></main></div></div>`;
+    app.innerHTML = `<div class="workspace"><aside class="sidebar"><a href="#" class="sidebar-brand" data-action="home">${icon}<span><strong>FLORAL<br>CIRCULAR</strong><small>DEMO CONTROL TOWER</small></span></a><div class="sidebar-org"><span class="org-avatar">${current.initials}</span><div><strong>${current.title}</strong><small>${current.tagline}</small></div><span class="org-chevron">⌄</span></div><nav class="side-nav" aria-label="Workspace navigation"><span class="nav-caption">WORKSPACE</span>${current.views.map(([key, label]) => `<button class="side-link ${view === key ? 'active' : ''}" data-view="${key}"><span class="side-glyph">${navGlyph(key)}</span>${label}${key === 'alerts' && unread ? `<i class="nav-count">${unread}</i>` : key === 'enquiries' && state().enquiries.filter(item => item.status === 'New').length ? `<i class="nav-count">${state().enquiries.filter(item => item.status === 'New').length}</i>` : ''}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="demo-status"><span></span><div><b>DEMO ENVIRONMENT</b><small>Local browser data</small></div></div><button class="side-link" data-action="reset-demo"><span class="side-glyph">↻</span>Reset demo data</button><button class="side-link" data-action="logout"><span class="side-glyph">↗</span>Return to public site</button><div class="sidebar-foot">Floral Circular · Prototype<br>Not for operational use</div></div></aside><div class="workspace-main"><header class="topbar"><button class="icon-button sidebar-toggle" aria-label="Toggle navigation" data-action="sidebar-toggle">☰</button><div class="breadcrumb"><span>Floral Circular</span><b>/</b><strong>${esc(current.views.find(x => x[0] === view)?.[1] || 'Overview')}</strong></div><div class="topbar-right"><span class="top-date">Jammu <b>·</b> Demo dataset</span><button class="icon-button notification-button" aria-label="Open alerts" title="Open alerts" data-view="alerts">♧${unread ? `<i>${unread}</i>` : ''}</button><button class="profile-chip" data-action="switch-role"><span>${current.initials}</span><span class="profile-label">${current.title}<small>Demo role · not authenticated</small></span><b>⌄</b></button></div></header><main class="workspace-content"><div class="demo-banner"><span>DEMO</span><p>Fictional sample records are stored in this browser only. This role switch is not a secure login.</p><button data-action="about-demo" aria-label="About demo data">ⓘ</button></div><div class="view-content">${content}</div><footer class="workspace-footer">Demo preview · No live GPS, external messaging or production records connected <a href="#" data-action="about-demo">About this demo</a></footer></main></div></div>`;
   }
 
   function navGlyph(key) {
-    return ({ overview: '⌂', collections: '◌', facility: '▤', processing: '◇', inventory: '▦', shipments: '⇄', alerts: '!', reports: '▥', today: '▦', pickups: '↓', deliveries: '↑', issues: '⚑', history: '◷', incoming: '↙', requests: '＋', feedback: '☆' })[key] || '·';
+    return ({ overview: '⌂', enquiries: '✉', collections: '◌', facility: '▤', processing: '◇', inventory: '▦', shipments: '⇄', alerts: '!', reports: '▥', today: '▦', pickups: '↓', deliveries: '↑', issues: '⚑', history: '◷', incoming: '↙', requests: '＋', feedback: '☆' })[key] || '·';
   }
 
   function render() {
@@ -280,8 +290,8 @@
     return `<label class="form-field"><span>${label}${required ? ' <i>*</i>' : ''}</span><input type="${type}" ${common}></label>`;
   }
 
-  function selectField(label, name, options, required = true) {
-    return `<label class="form-field"><span>${label}${required ? ' <i>*</i>' : ''}</span><select name="${name}" ${required ? 'required' : ''}>${options.map(([value, text]) => `<option value="${esc(value)}">${esc(text)}</option>`).join('')}</select></label>`;
+  function selectField(label, name, options, required = true, selectedValue = '') {
+    return `<label class="form-field"><span>${label}${required ? ' <i>*</i>' : ''}</span><select name="${name}" ${required ? 'required' : ''}>${options.map(([value, text]) => `<option value="${esc(value)}" ${value === selectedValue ? 'selected' : ''}>${esc(text)}</option>`).join('')}</select></label>`;
   }
 
   function multiSelectField(label, name, options) {
@@ -303,7 +313,8 @@
   }
 
   function openContact() {
-    openDialog('Start a partnership enquiry', 'Demo only: submissions remain in this browser and are not sent to a real organisation.', `${selectField('I represent', 'category', [['Floral-waste source', 'Floral-waste source'], ['Transport provider', 'Transport provider'], ['Processing facility', 'Processing facility'], ['Startup partner', 'Startup partner'], ['Other', 'Other']])}${field('Name', 'name', 'text', true, 'Your name')}${field('Email', 'email', 'email', true, 'you@organisation.in')}${textareaField('How would you like to collaborate?', 'message', 'A short description of your organisation and locality')}`, 'Save enquiry', 'contact');
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('.public-enquiry-form [name="fullName"]')?.focus({ preventScroll: true });
   }
 
   function openForm(action, id) {
@@ -330,14 +341,37 @@
     if (action === 'new-feedback') return openDialog('Submit quality feedback', `Feedback for ${id} is linked to the shipment and source batch.`, `${selectField('Overall usability', 'rating', [['5', '5 · Excellent'], ['4', '4 · Good'], ['3', '3 · Acceptable'], ['2', '2 · Poor'], ['1', '1 · Unusable']])}${textareaField('Quality observations', 'comments', 'Freshness, moisture, contamination, composition, packaging and usability')}`, 'Submit feedback', action, id);
     if (action === 'new-request') return openDialog('Request future material', 'Your request is sent to operations for review and does not reserve available stock.', `${field('Material category', 'material', 'text', true, 'Material type required')}${field('Requested quantity (kg)', 'quantityKg', 'number', true, 'Quantity')}${field('Required by', 'date', 'date', true, '', today())}${textareaField('Requirements', 'requirements', 'Freshness, moisture, packaging or handling needs', false)}`, 'Submit request', action);
     if (action === 'new-issue') return openDialog('Raise a transport issue', 'Issue details are added to the shared demo exception queue.', `${selectField('Issue category', 'category', [['Vehicle breakdown', 'Vehicle breakdown'], ['Traffic or route obstruction', 'Traffic or route obstruction'], ['Temple inaccessible', 'Temple inaccessible'], ['Bin missing or damaged', 'Bin missing or damaged'], ['No waste available', 'No waste available'], ['Incorrect schedule', 'Incorrect schedule'], ['Safety concern', 'Safety concern'], ['Quantity mismatch', 'Quantity mismatch'], ['Delivery delay', 'Delivery delay'], ['Other', 'Other']])}${field('Affected task or shipment', 'reference', 'text', false, 'PU-0000 / SH-0000')}${selectField('Severity', 'severity', [['Medium', 'Medium'], ['High', 'High'], ['Critical', 'Critical']])}${textareaField('Description', 'description', 'What happened and what response is needed?')}`, 'Report issue', action);
+    if (action === 'update-enquiry') {
+      const enquiry = s.enquiries.find(item => item.id === id);
+      if (!enquiry) return toast('Enquiry not found.', true);
+      const statuses = ['New', 'In Review', 'Contacted', 'Closed'];
+      const options = [enquiry.status, ...statuses.filter(status => status !== enquiry.status)].map(status => [status, status]);
+      return openDialog('Update enquiry status', `${enquiry.id} · ${enquiry.fullName}`, selectField('Status', 'status', options, true, enquiry.status), 'Save status', action, id);
+    }
   }
 
   function submitForm(form) {
     const values = Object.fromEntries(new FormData(form).entries());
     if (form.elements.intakeIds) values.intakeIds = Array.from(form.elements.intakeIds.selectedOptions, option => option.value);
     const action = form.dataset.form;
+    if (action === 'contact') {
+      const feedback = document.getElementById('enquiry-feedback');
+      try {
+        const enquiry = data.addEnquiry(values);
+        form.reset();
+        feedback.textContent = `Demo enquiry ${enquiry.id} was saved in this browser only. It was not securely sent to or shared with an operations team.`;
+        feedback.classList.add('enquiry-feedback-visible');
+        feedback.setAttribute('role', 'status');
+        toast('Demo enquiry saved in this browser only.');
+      } catch (error) {
+        feedback.textContent = error.message || 'Unable to save this enquiry.';
+        feedback.classList.add('enquiry-feedback-visible');
+        feedback.setAttribute('role', 'alert');
+        toast(error.message || 'Unable to save this enquiry.', true);
+      }
+      return;
+    }
     try {
-      if (action === 'contact') { data.addEnquiry(values); toast('Enquiry saved in this browser demo.'); }
       if (action === 'new-pickup') { data.createPickup(values); toast('Pickup added to the demo schedule.'); }
       if (action === 'record-pickup') { data.recordPickup(values.pickupId, values); toast('Pickup record submitted for operations review.'); }
       if (action === 'new-intake') { data.createIntake(values); toast('Facility intake registered.'); }
@@ -348,6 +382,7 @@
       if (action === 'new-feedback') { data.submitFeedback(form.dataset.id, values); toast('Quality feedback submitted.'); }
       if (action === 'new-request') { data.createRequest(values); toast('Material request submitted for operations review.'); }
       if (action === 'new-issue') { data.reportIssue(values); toast('Issue added to the operations exception queue.'); }
+      if (action === 'update-enquiry') { data.updateEnquiryStatus(form.dataset.id, values.status); toast('Enquiry status updated.'); }
       if (action === 'complete-batch' && values.estimated === 'on') toast('Estimated batch output saved; it cannot be released as stock.');
       dialogRoot.innerHTML = '';
       render();
@@ -388,7 +423,7 @@
     if (action === 'dispatch-shipment') { try { data.advanceShipment(target.dataset.id, 'In Transit'); toast('Departure recorded. Startup acceptance is still pending.'); render(); } catch (error) { toast(error.message, true); } return; }
     if (action === 'deliver-shipment') { try { data.advanceShipment(target.dataset.id, 'Delivered Awaiting Confirmation'); toast('Delivery evidence recorded. Startup receipt is still pending.'); render(); } catch (error) { toast(error.message, true); } return; }
     if (action === 'export-csv') return exportCsv();
-    if (action === 'record-pickup' || action === 'new-pickup' || action === 'new-intake' || action === 'new-batch' || action === 'complete-batch' || action === 'new-shipment' || action === 'confirm-receipt' || action === 'new-feedback' || action === 'new-request' || action === 'new-issue') return openForm(action, target.dataset.id);
+    if (action === 'record-pickup' || action === 'new-pickup' || action === 'new-intake' || action === 'new-batch' || action === 'complete-batch' || action === 'new-shipment' || action === 'confirm-receipt' || action === 'new-feedback' || action === 'new-request' || action === 'new-issue' || action === 'update-enquiry') return openForm(action, target.dataset.id);
   });
 
   document.addEventListener('submit', event => {

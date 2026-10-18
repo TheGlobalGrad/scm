@@ -70,7 +70,9 @@
     }
 
     function alertFor(title, detail, severity) {
-        state.alerts.unshift({ id: nextId('AL-', state.alerts), title, detail, severity: severity || 'Medium', status: 'Open', owner: 'Operations' });
+        const alert = { id: nextId('AL-', state.alerts), title, detail, severity: severity || 'Medium', status: 'Open', owner: 'Operations' };
+        state.alerts.unshift(alert);
+        return alert;
     }
 
     function getState() {
@@ -224,9 +226,58 @@
     }
 
     function addEnquiry(values) {
-        state.enquiries.unshift({ id: nextId('EN-', state.enquiries), ...values, createdAt: new Date().toISOString() });
-        log('Partnership enquiry received · ' + values.category);
-        persist();
+        const allowedStakeholders = ['Flower shopkeeper', 'Temple', 'Individual', 'Organization', 'Other'];
+        const allowedPurposes = ['Donate floral waste', 'Sell floral waste', 'Arrange regular collection', 'Partner with Floral Circular', 'General enquiry'];
+        const enquiry = {
+            fullName: String(values.fullName || '').trim(),
+            mobile: String(values.mobile || '').trim(),
+            email: String(values.email || '').trim(),
+            organization: String(values.organization || '').trim(),
+            stakeholderType: String(values.stakeholderType || ''),
+            purpose: String(values.purpose || ''),
+            floralDetails: String(values.floralDetails || '').trim(),
+            message: String(values.message || '').trim()
+        };
+        const mobileDigits = enquiry.mobile.replace(/\D/g, '');
+        if (enquiry.fullName.length < 2 || enquiry.fullName.length > 100) throw new Error('Enter a full name between 2 and 100 characters.');
+        if (!/^\+?[0-9\s().-]{7,20}$/.test(enquiry.mobile) || mobileDigits.length < 7 || mobileDigits.length > 15) throw new Error('Enter a valid mobile number with 7 to 15 digits.');
+        if (enquiry.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(enquiry.email)) throw new Error('Enter a valid email address.');
+        if (enquiry.organization.length > 120 || !allowedStakeholders.includes(enquiry.stakeholderType) || !allowedPurposes.includes(enquiry.purpose)) throw new Error('Choose a valid stakeholder type and enquiry purpose.');
+        if (enquiry.floralDetails.length > 1000 || enquiry.message.length > 2000) throw new Error('Floral waste details must be 1,000 characters or fewer and the message must be 2,000 characters or fewer.');
+
+        const previous = clone(state);
+        enquiry.id = nextId('EN-', state.enquiries);
+        enquiry.status = 'New';
+        enquiry.createdAt = new Date().toISOString();
+        state.enquiries.unshift(enquiry);
+        log('Contribution enquiry received · ' + enquiry.id);
+        alertFor('New contribution enquiry', enquiry.id + ' · ' + enquiry.stakeholderType + ' · ' + enquiry.purpose, 'Medium').relatedEnquiryId = enquiry.id;
+        try {
+            persist();
+        } catch (error) {
+            state = previous;
+            throw new Error('Unable to save the enquiry in this browser. No changes were saved. ' + error.message);
+        }
+        return enquiry;
+    }
+
+    function updateEnquiryStatus(id, status) {
+        const allowedStatuses = ['New', 'In Review', 'Contacted', 'Closed'];
+        const enquiry = state.enquiries.find(item => item.id === id);
+        if (!enquiry) throw new Error('Enquiry not found.');
+        if (!allowedStatuses.includes(status)) throw new Error('Choose a valid enquiry status.');
+
+        const previous = clone(state);
+        enquiry.status = status;
+        enquiry.updatedAt = new Date().toISOString();
+        state.alerts.filter(item => item.relatedEnquiryId === id).forEach(item => { item.status = status === 'New' ? 'Open' : 'Resolved'; });
+        log('Enquiry ' + id + ' updated · ' + status);
+        try {
+            persist();
+        } catch (error) {
+            state = previous;
+            throw new Error('Unable to update this enquiry in the browser. No changes were saved. ' + error.message);
+        }
     }
 
     function createRequest(values) {
@@ -258,5 +309,5 @@
         persist();
     }
 
-    window.FloralData = { getState, createPickup, recordPickup, verifyPickup, createIntake, createBatch, startBatch, completeBatch, approveBatch, createShipment, advanceShipment, confirmReceipt, submitFeedback, addEnquiry, createRequest, reportIssue, resolveAlert, resetDemo };
+    window.FloralData = { getState, createPickup, recordPickup, verifyPickup, createIntake, createBatch, startBatch, completeBatch, approveBatch, createShipment, advanceShipment, confirmReceipt, submitFeedback, addEnquiry, updateEnquiryStatus, createRequest, reportIssue, resolveAlert, resetDemo };
 })();

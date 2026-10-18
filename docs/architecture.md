@@ -2,7 +2,7 @@
 
 ## Current demonstration
 
-`index.html` loads three small browser scripts: `frontend/styles.css` for the public site and responsive portal layouts, `frontend/data.js` for the shared in-browser data store and workflow guards, and `frontend/app.js` for rendering, navigation, dialogs and form actions. The store persists in localStorage and notifies the UI on changes. **This is a single-browser demo store, not a multi-user data service.** Reset clears all local changes and restores the fictional seed dataset.
+`index.html` loads three small browser scripts: `frontend/styles.css` for the public site and responsive portal layouts, `frontend/data.js` for the shared in-browser data store and workflow guards, and `frontend/app.js` for rendering, navigation, dialogs and form actions. The public contribution-enquiry form validates and stores fictional submissions in localStorage; operations can review them, update their status and see a related item in the existing alerts feed. **This is a single-browser demo store, not secure or shared data service, and it must not be used for real personal information.** Reset clears all local changes and restores the fictional seed dataset.
 
 ## Workflow state transitions
 
@@ -13,6 +13,10 @@
 - Delivery: vendor actions move `Assigned` to `In Transit` to `Delivered Awaiting Confirmation`; a startup separately records actual received weight and outcome.
 
 The dashboard yield uses recorded accepted output divided by recorded input. Pickup verification is count-based in the sample report. These demo calculations are not a verified reporting period or project result.
+
+## Enquiry demo workflow
+
+The public contact section accepts a name, mobile number, email, optional organisation, stakeholder type, enquiry purpose, optional floral-waste details and optional message. New records start as `New`; operations can set `In Review`, `Contacted` or `Closed`. Each submission adds an open operations alert, resolved when the enquiry moves out of `New`. These records and alerts exist only in that browser's localStorage. A production implementation must instead persist them through an authenticated API in the configured database, enforce server-side validation and access control, and deliver an in-app notification through the selected shared notification mechanism.
 
 ## Production data design
 
