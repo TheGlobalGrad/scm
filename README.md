@@ -31,7 +31,19 @@ The frontend is dependency-free. Open `frontend/index.html` in a modern browser,
 py -m http.server 8000
 ```
 
-Then open <http://localhost:8000/frontend/>. No Node.js install, build step, account, API key or cloud service is needed for this demo. The external hero photo and web fonts need an internet connection; the layout and workflows remain usable if those assets cannot load.
+Then open <http://localhost:8000/frontend/>. No Node.js install, build step, account or cloud service is needed for the demo workflows. The interactive Google Map requires a Google Maps JavaScript API key; without one, the page clearly reports that the map is not configured and still links to Google Maps. The external hero photo and web fonts also need an internet connection.
+
+### Enable the Google Map
+
+Create a Google Maps JavaScript API key in Google Cloud, enable billing and the Maps JavaScript API, and restrict the key to the deployed site's HTTP referrers and the Maps JavaScript API. The key is browser-visible by design, so never use an unrestricted key. Provide it as `window.FloralMapsConfig.googleMapsApiKey` before `app.js` loads, for example by adding this configuration before the `data.js` and `app.js` script tags in `frontend/index.html`:
+
+```html
+<script>
+  window.FloralMapsConfig = { googleMapsApiKey: "YOUR_RESTRICTED_BROWSER_KEY" };
+</script>
+```
+
+Do not commit a real key. If a key is not set or Google Maps fails to load, the Network section reports that state instead of claiming the map is working. The map pins are fictional demonstration points, not verified partner or collection-centre locations.
 
 ## Deploy to Vercel
 
