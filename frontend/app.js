@@ -8,6 +8,14 @@
         let googleMapsLoadPromise;
         let mapTilesTimer;
         let googleMapsAuthFailed = false;
+        let fallbackMap;
+        let fallbackMapElement;
+        let fallbackMapReady = false;
+        const demoMapLocations = [
+          { name: 'Demo location 1', lat: 32.7266, lng: 74.8570 },
+          { name: 'Demo location 2', lat: 32.7350, lng: 74.8700 },
+          { name: 'Demo location 3', lat: 32.7150, lng: 74.8400 }
+        ];
 
         const roles = {
             operations: {
@@ -111,7 +119,7 @@
           <div class="section-kicker">FROM SOURCE TO PARTNER <span>02 — 05</span></div><div class="section-heading-row"><h2>Every handover<br>has a record.</h2><p>Material moves through clear stages. Quantities and quality are recorded at each step, not assumed.</p></div>
           <div class="process-line"><article><span class="step-num">01</span><div class="step-mark">01</div><h3>Collect</h3><p>Approved sources and bin conditions are scheduled and documented.</p><small>Source · Operations</small></article><article><span class="step-num">02</span><div class="step-mark">02</div><h3>Transport</h3><p>Assigned vendors record arrival, outcome and collection evidence.</p><small>Vendor · Driver</small></article><article><span class="step-num">03</span><div class="step-mark">03</div><h3>Clean & segregate</h3><p>Facility intake, processing losses and inspected output stay traceable.</p><small>Facility · Quality</small></article><article><span class="step-num">04</span><div class="step-mark">04</div><h3>Deliver</h3><p>Released stock is allocated, dispatched and tracked to its destination.</p><small>Operations · Vendor</small></article><article><span class="step-num">05</span><div class="step-mark">05</div><h3>Confirm & learn</h3><p>Partners confirm actual receipt and share quality feedback.</p><small>Startup · Operations</small></article></div>
         </div></section>
-        <section class="network-section section-wrap" id="network"><div class="section-kicker">A CONNECTED NETWORK <span>03 — 05</span></div><div class="section-heading-row"><h2>Built around<br>real collaboration.</h2><p>Approved organisations will appear here when verified information is available.</p></div><div class="network-map-card"><div class="network-map-heading"><div><span class="mini-label">JAMMU · DEMONSTRATION MAP</span><h3>Explore the example locations.</h3></div><span id="google-map-status" class="map-status" data-state="loading" role="status" aria-live="polite">Checking Google Maps…</span></div><p class="network-map-note">Pins are fictional demonstration points, not verified collection centres or partner locations. Google Maps availability is reported below.</p><div id="network-map" class="network-map" role="region" aria-label="Google map showing fictional demonstration points near Jammu"></div><div class="network-map-footer"><a class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query=Jammu%2C%20India" target="_blank" rel="noopener noreferrer">Open Jammu in Google Maps <span aria-hidden="true">↗</span></a><button class="text-link" data-action="contact">Start a conversation <span>→</span></button></div></div></section>
+        <section class="network-section section-wrap" id="network"><div class="section-kicker">A CONNECTED NETWORK <span>03 — 05</span></div><div class="section-heading-row"><h2>Built around<br>real collaboration.</h2><p>Approved organisations will appear here when verified information is available.</p></div><div class="network-map-card"><div class="network-map-heading"><div><span class="mini-label">JAMMU · DEMONSTRATION MAP</span><h3>Explore the example locations.</h3></div><span id="google-map-status" class="map-status" data-state="loading" role="status" aria-live="polite">Loading interactive map…</span></div><p class="network-map-note">Pins are fictional demonstration points, not verified collection centres or partner locations.</p><div id="network-map" class="network-map" role="region" aria-label="Interactive map showing fictional demonstration points near Jammu"></div><div class="network-map-footer"><a class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query=Jammu%2C%20India" target="_blank" rel="noopener noreferrer">Open Jammu in Google Maps <span aria-hidden="true">↗</span></a><button class="text-link" data-action="contact">Start a conversation <span>→</span></button></div></div></section>
         <section class="impact-section" id="impact"><div class="section-wrap"><div class="section-kicker">MEASURE WHAT IS VERIFIED <span>04 — 05</span></div><div class="impact-header"><h2>Transparent by design.</h2><span class="period-tag">DEMONSTRATION DATA ONLY</span></div><p class="impact-copy">Illustrative workflow totals from fictional demo records. These figures do not represent project activity or environmental impact.</p><div class="impact-metrics"><div><small>Pickup quantities recorded</small><strong>${kg(collected)}</strong><span>Demo records · reported weight</span></div><div><small>Quality-approved output</small><strong>${kg(approved)}</strong><span>Demo records · measured output</span></div><div><small>Confirmed accepted</small><strong>${kg(s.shipments.filter(x => x.status === 'Receipt Confirmed').reduce((n, x) => n + (x.receivedKg || 0), 0))}</strong><span>Demo records · partner-confirmed</span></div><div><small>Verified participation</small><strong>—</strong><span>No verified data available</span></div></div></div></section>
         <section class="resources-section section-wrap" id="resources"><div class="section-kicker">RESOURCES <span>05 — 05</span></div><div class="resource-row"><div><span class="mini-label">METHODOLOGY & REPORTING</span><h2>Evidence before claims.</h2></div><div><p>Reports, measurement definitions and educational resources will be published as they become available. No project reports have been added yet.</p><span class="empty-inline">No resources available</span></div></div></section>
         <section class="faq-section section-wrap" id="faq"><div class="section-kicker">PRACTICAL QUESTIONS <span>POLICIES</span></div><div class="faq-grid"><div><span class="mini-label">FAQ & RESPONSIBILITY</span><h2>Clear expectations<br>at every handover.</h2><p>Project procedures and formal policies should be agreed with participating organisations before operations begin.</p></div><div class="faq-list"><details><summary>How are quantities verified?</summary><p>Collection reports and facility net weights are separate records. Differences require a note and review; processing output is divided into usable, rejected and loss quantities.</p></details><details><summary>Is vehicle location tracked?</summary><p>The map can show static fictional demonstration pins when Google Maps is configured; it does not track vehicles or show verified partner locations. Production tracking requires explicit driver consent, defined tracking periods and protected location history.</p></details><details><summary>What if a delivery quantity differs?</summary><p>The receiving partner records actual quantity and outcome. A difference remains disputed, creates an operations alert and is not counted as accepted stock.</p></details><details><summary>How is demo information handled?</summary><p>Sample workflow changes stay in this browser's local storage. Do not enter personal, confidential or real operational data. There is no account security or server-side access control.</p></details><details id="privacy"><summary>Privacy notice</summary><p>This prototype has no server-side collection, analytics, GPS or messaging integration. A production privacy notice must explain data use, retention, access, evidence storage, tracking consent and contact routes after those services are configured.</p></details><details id="terms"><summary>Terms and partner responsibilities</summary><p>These demo screens do not establish service, payment, safety, quality or dispute terms. Participating organisations should approve written procedures and obtain local legal review before use.</p></details></div></div></section>
@@ -128,9 +136,64 @@
           status.textContent = message;
         }
 
+        function initializeOpenStreetMap(fallbackMessage) {
+          const mapElement = document.getElementById('network-map');
+          if (!mapElement) return;
+          if (!window.L) {
+            clearTimeout(mapTilesTimer);
+            setGoogleMapsStatus('error', 'Map tiles could not be loaded. Check your internet connection.');
+            return;
+          }
+
+          if (fallbackMapElement === mapElement && fallbackMap) {
+            if (fallbackMapReady) {
+              setGoogleMapsStatus('ready', fallbackMessage || 'Interactive map is working (OpenStreetMap).');
+            }
+            return;
+          }
+
+          clearTimeout(mapTilesTimer);
+          if (fallbackMap) fallbackMap.remove();
+          mapElement.replaceChildren();
+          try {
+            const map = window.L.map(mapElement).setView([32.7266, 74.8570], 13);
+            fallbackMap = map;
+            fallbackMapElement = mapElement;
+            fallbackMapReady = false;
+            const tileLayer = window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 19,
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+            }).addTo(map);
+
+            demoMapLocations.forEach(location => {
+              window.L.marker([location.lat, location.lng])
+                .addTo(map)
+                .bindPopup(`${esc(location.name)} · demonstration only`);
+            });
+
+            setGoogleMapsStatus('loading', 'Loading interactive OpenStreetMap…');
+            mapTilesTimer = setTimeout(() => {
+              setGoogleMapsStatus('error', 'Map tiles are not loading. Check your internet connection.');
+            }, 12000);
+            tileLayer.once('load', () => {
+              if (fallbackMap !== map) return;
+              fallbackMapReady = true;
+              clearTimeout(mapTilesTimer);
+              setGoogleMapsStatus('ready', fallbackMessage || 'Interactive map is working (OpenStreetMap).');
+            });
+          } catch (error) {
+            clearTimeout(mapTilesTimer);
+            setGoogleMapsStatus('error', 'The interactive map could not be initialized. Check your internet connection and reload.');
+          }
+        }
+
         function initializeGoogleMap() {
           const mapElement = document.getElementById('network-map');
-          if (!mapElement || !window.google?.maps) return;
+          if (!mapElement) return;
+          if (!window.google?.maps || googleMapsAuthFailed) {
+            initializeOpenStreetMap('Google Maps is unavailable; OpenStreetMap is working.');
+            return;
+          }
 
           clearTimeout(mapTilesTimer);
           setGoogleMapsStatus('loading', 'Google Maps loaded; waiting for map tiles…');
@@ -145,13 +208,7 @@
               fullscreenControl: true
             });
             const infoWindow = new window.google.maps.InfoWindow();
-            const demoLocations = [
-              { name: 'Demo location 1', lat: 32.7266, lng: 74.8570 },
-              { name: 'Demo location 2', lat: 32.7350, lng: 74.8700 },
-              { name: 'Demo location 3', lat: 32.7150, lng: 74.8400 }
-            ];
-
-            demoLocations.forEach(location => {
+            demoMapLocations.forEach(location => {
               const marker = new window.google.maps.Marker({
                 map,
                 position: { lat: location.lat, lng: location.lng },
@@ -175,12 +232,11 @@
             });
             if (!tilesLoaded && !googleMapsAuthFailed) {
               mapTilesTimer = setTimeout(() => {
-                setGoogleMapsStatus('error', 'Google Maps did not load map tiles. Check the API key, billing, restrictions, and internet connection.');
+                initializeOpenStreetMap('Google Maps did not load; OpenStreetMap is working instead.');
               }, 12000);
             }
           } catch (error) {
-            clearTimeout(mapTilesTimer);
-            setGoogleMapsStatus('error', 'Google Maps could not be initialized. Check the API key and Maps JavaScript API setup.');
+            initializeOpenStreetMap('Google Maps could not start; OpenStreetMap is working instead.');
           }
         }
 
@@ -188,7 +244,7 @@
           const configuredKey = window.FloralMapsConfig?.googleMapsApiKey;
           const apiKey = typeof configuredKey === 'string' ? configuredKey.trim() : '';
           if (!apiKey) {
-            setGoogleMapsStatus('unavailable', 'Google Maps is not working: no API key is configured.');
+            initializeOpenStreetMap('Interactive map is working (OpenStreetMap). Google Maps requires an API key.');
             return;
           }
           if (window.google?.maps) {
@@ -203,8 +259,7 @@
               googleMapsAuthFailed = false;
               window.gm_authFailure = () => {
                 googleMapsAuthFailed = true;
-                clearTimeout(mapTilesTimer);
-                setGoogleMapsStatus('error', 'Google Maps authentication failed. Check the API key, billing, and allowed referrers.');
+                initializeOpenStreetMap('Google Maps authentication failed; OpenStreetMap is working instead.');
               };
               const script = document.createElement('script');
               script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&callback=floralGoogleMapsReady`;
@@ -219,7 +274,7 @@
           }
 
           googleMapsLoadPromise.then(initializeGoogleMap).catch(() => {
-            setGoogleMapsStatus('error', 'Google Maps could not be loaded. Check the API key and internet connection.');
+            initializeOpenStreetMap('Google Maps could not be loaded; OpenStreetMap is working instead.');
           });
         }
 

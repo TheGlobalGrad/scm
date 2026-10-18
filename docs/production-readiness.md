@@ -1,6 +1,6 @@
 # Production readiness and deployment
 
-The application is currently a static prototype. It has no backend, authentication, database, production roles, secure file storage, GPS tracking, SMS/push delivery, email delivery, or real partners. Its Google Map is an optional browser-side demonstration that requires a restricted Google Maps JavaScript API key; it is not connected to live partner or vehicle data. The role selector only changes the interface and must never be treated as access control. All sample records are fictional.
+The application is currently a static prototype. It has no backend, authentication, database, production roles, secure file storage, GPS tracking, SMS/push delivery, email delivery, or real partners. Its map is a browser-side demonstration using Google Maps when configured and OpenStreetMap as a fallback; it is not connected to live partner or vehicle data. The role selector only changes the interface and must never be treated as access control. All sample records are fictional.
 
 The contribution-enquiry form is also a prototype-only interaction: it writes submitted values to the current browser's localStorage, exposes them to anyone using that browser profile, and creates an alert only in that same local dataset. It does not securely store, share, or notify an operations team. Never submit real contact information through this version.
 

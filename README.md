@@ -31,7 +31,7 @@ The frontend is dependency-free. Open `frontend/index.html` in a modern browser,
 py -m http.server 8000
 ```
 
-Then open <http://localhost:8000/frontend/>. No Node.js install, build step, account or cloud service is needed for the demo workflows. The interactive Google Map requires a Google Maps JavaScript API key; without one, the page clearly reports that the map is not configured and still links to Google Maps. The external hero photo and web fonts also need an internet connection.
+Then open <http://localhost:8000/frontend/>. No Node.js install, build step, account or cloud service is needed for the demo workflows. The interactive map uses Google Maps when a key is configured and automatically falls back to OpenStreetMap when no key is available. Both map providers need an internet connection to load map tiles. The external hero photo and web fonts also need an internet connection.
 
 ### Enable the Google Map
 
@@ -43,7 +43,7 @@ Create a Google Maps JavaScript API key in Google Cloud, enable billing and the 
 </script>
 ```
 
-Do not commit a real key. If a key is not set or Google Maps fails to load, the Network section reports that state instead of claiming the map is working. The map pins are fictional demonstration points, not verified partner or collection-centre locations.
+Do not commit a real key. If a key is not set or Google Maps fails to load, the Network section displays an interactive OpenStreetMap map and reports which map provider is working. The map pins are fictional demonstration points, not verified partner or collection-centre locations.
 
 ## Deploy to Vercel
 
