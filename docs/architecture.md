@@ -2,7 +2,7 @@
 
 ## Current demonstration
 
-`index.html` loads three small browser scripts: `frontend/styles.css` for the public site and responsive portal layouts, `frontend/data.js` for the shared in-browser data store and workflow guards, and `frontend/app.js` for rendering, navigation, dialogs and form actions. The public contribution-enquiry form validates and stores fictional submissions in localStorage; operations can review them, update their status and see a related item in the existing alerts feed. **This is a single-browser demo store, not secure or shared data service, and it must not be used for real personal information.** Reset clears all local changes and restores the fictional seed dataset.
+`index.html` loads `frontend/styles.css` for the public site and responsive portal layouts, `frontend/data.js` for the shared in-browser demo data store and workflow guards, `frontend/planning.js` for the supplied Jammu locations and workbook-based bin calculations, and `frontend/app.js` for rendering, navigation, dialogs and form actions. The public map uses Leaflet and OpenStreetMap; its static coordinates are not live tracking or proof of confirmed partners. The public bin plan is estimated planning data, separate from the fictional portal workflow dataset. The contribution-enquiry form validates and stores fictional submissions in localStorage; operations can review them, update their status and see a related item in the existing alerts feed. **This is a single-browser demo store, not a secure or shared data service, and it must not be used for real personal information.** Reset clears all local changes and restores the fictional seed dataset.
 
 ## Workflow state transitions
 

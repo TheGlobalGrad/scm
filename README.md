@@ -2,7 +2,7 @@
 
 A responsive demonstration of a floral-waste supply-chain coordination platform for Jammu. The public site and three role-specific demo portals share a browser-persisted sample dataset and connected workflows for pickup, facility intake, processing, quality release, stock allocation, dispatch, partner receipt and feedback.
 
-All organisations, locations, events, quantities and performance values in the demonstration are fictional. The platform coordinates a material journey; it does not claim to manufacture products or to represent verified project impact.
+The role-based workflow portals use fictional demonstration records. Separately, the public Network section shows supplied Jammu location coordinates and planning estimates from the team's workbook; these do not establish verified partnerships, operating facilities, deployed bins, live measurements or project impact. The platform coordinates a proposed material journey; it does not claim to manufacture products.
 
 ## Project layout
 
@@ -11,6 +11,7 @@ scm/
 ├── frontend/
 │   ├── app.js
 │   ├── data.js
+│   ├── planning.js
 │   └── styles.css
 ├── docs/
 │   ├── architecture.md
@@ -31,19 +32,9 @@ The frontend is dependency-free. Open `frontend/index.html` in a modern browser,
 py -m http.server 8000
 ```
 
-Then open <http://localhost:8000/frontend/>. No Node.js install, build step, account or cloud service is needed for the demo workflows. The interactive map uses Google Maps when a key is configured and automatically falls back to OpenStreetMap when no key is available. Both map providers need an internet connection to load map tiles. The external hero photo and web fonts also need an internet connection.
+Then open <http://localhost:8000/frontend/>. No Node.js install, build step, account or cloud service is needed for the demo workflows. The map uses Leaflet and OpenStreetMap tiles with attribution; no paid API key is required. The interactive map, external hero photo and web fonts need an internet connection. If map tiles are unavailable, the location list and workbook-based planning section remain usable.
 
-### Enable the Google Map
-
-Create a Google Maps JavaScript API key in Google Cloud, enable billing and the Maps JavaScript API, and restrict the key to the deployed site's HTTP referrers and the Maps JavaScript API. The key is browser-visible by design, so never use an unrestricted key. Provide it as `window.FloralMapsConfig.googleMapsApiKey` before `app.js` loads, for example by adding this configuration before the `data.js` and `app.js` script tags in `frontend/index.html`:
-
-```html
-<script>
-  window.FloralMapsConfig = { googleMapsApiKey: "YOUR_RESTRICTED_BROWSER_KEY" };
-</script>
-```
-
-Do not commit a real key. If a key is not set or Google Maps fails to load, the Network section displays an interactive OpenStreetMap map and reports which map provider is working. The map pins are fictional demonstration points, not verified partner or collection-centre locations.
+The public Network section uses static coordinates provided for four temples, three potential processing partners or initiatives, and one proposed Gangyal processing-site location. It also calculates initial bin and pickup plans from the supplied workbook inputs. Values are estimates and assumptions, not independently verified or operational records. The 10:00 AM and 8:00 PM pickup defaults are retained alongside the workbook's separate six-hour modelled interval; the page calls out that these clock times are ten hours apart.
 
 ## Deploy to Vercel
 

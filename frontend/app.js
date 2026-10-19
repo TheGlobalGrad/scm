@@ -5,17 +5,18 @@
         let role = null;
         let view = 'overview';
         let toastTimer;
-        let googleMapsLoadPromise;
-        let mapTilesTimer;
-        let googleMapsAuthFailed = false;
-        let fallbackMap;
-        let fallbackMapElement;
-        let fallbackMapReady = false;
-        const demoMapLocations = [
-          { name: 'Demo location 1', lat: 32.7266, lng: 74.8570 },
-          { name: 'Demo location 2', lat: 32.7350, lng: 74.8700 },
-          { name: 'Demo location 3', lat: 32.7150, lng: 74.8400 }
-        ];
+        const planning = window.FloralPlanning;
+        const planningDayLabels = { ordinary: 'Ordinary day', tuesday: 'Tuesday', festival: 'Festival day' };
+        let planningDay = 'ordinary';
+        let selectedLocationId = 'raghunath';
+        let selectedTempleId = 'raghunath';
+        let planningMap;
+        let planningResizeObserver;
+        let planningResizeHandler;
+        let planningTileTimer;
+        let planningMarkers = new Map();
+        let planningSpiderLayers = [];
+        let activePlanningPopup;
 
         const roles = {
             operations: {
@@ -119,163 +120,377 @@
           <div class="section-kicker">FROM SOURCE TO PARTNER <span>02 — 05</span></div><div class="section-heading-row"><h2>Every handover<br>has a record.</h2><p>Material moves through clear stages. Quantities and quality are recorded at each step, not assumed.</p></div>
           <div class="process-line"><article><span class="step-num">01</span><div class="step-mark">01</div><h3>Collect</h3><p>Approved sources and bin conditions are scheduled and documented.</p><small>Source · Operations</small></article><article><span class="step-num">02</span><div class="step-mark">02</div><h3>Transport</h3><p>Assigned vendors record arrival, outcome and collection evidence.</p><small>Vendor · Driver</small></article><article><span class="step-num">03</span><div class="step-mark">03</div><h3>Clean & segregate</h3><p>Facility intake, processing losses and inspected output stay traceable.</p><small>Facility · Quality</small></article><article><span class="step-num">04</span><div class="step-mark">04</div><h3>Deliver</h3><p>Released stock is allocated, dispatched and tracked to its destination.</p><small>Operations · Vendor</small></article><article><span class="step-num">05</span><div class="step-mark">05</div><h3>Confirm & learn</h3><p>Partners confirm actual receipt and share quality feedback.</p><small>Startup · Operations</small></article></div>
         </div></section>
-        <section class="network-section section-wrap" id="network"><div class="section-kicker">A CONNECTED NETWORK <span>03 — 05</span></div><div class="section-heading-row"><h2>Built around<br>real collaboration.</h2><p>Approved organisations will appear here when verified information is available.</p></div><div class="network-map-card"><div class="network-map-heading"><div><span class="mini-label">JAMMU · DEMONSTRATION MAP</span><h3>Explore the example locations.</h3></div><span id="google-map-status" class="map-status" data-state="loading" role="status" aria-live="polite">Loading interactive map…</span></div><p class="network-map-note">Pins are fictional demonstration points, not verified collection centres or partner locations.</p><div id="network-map" class="network-map" role="region" aria-label="Interactive map showing fictional demonstration points near Jammu"></div><div class="network-map-footer"><a class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query=Jammu%2C%20India" target="_blank" rel="noopener noreferrer">Open Jammu in Google Maps <span aria-hidden="true">↗</span></a><button class="text-link" data-action="contact">Start a conversation <span>→</span></button></div></div></section>
+        <section class="network-section section-wrap" id="network">
+          <div class="section-kicker">A CONNECTED NETWORK <span>03 — 05</span></div>
+          <div class="section-heading-row"><h2>Plan a more thoughtful<br>flower-waste journey.</h2><p>Explore the proposed Jammu network and the workbook-based bin plan. Potential partners and site locations are not confirmed operations.</p></div>
+          <div class="network-map-card">
+            <div class="network-map-heading"><div><span class="mini-label">JAMMU · LOCATION PLANNING MAP</span><h3>Temples, potential partners and a proposed site.</h3></div><span id="planning-map-status" class="map-status" data-state="loading" role="status" aria-live="polite">Loading OpenStreetMap…</span></div>
+            <p class="network-map-note">Pins use the supplied coordinates. Nearby points may fan out visually at overview zoom; popups and directions retain each exact coordinate. Temple points are proposed collection locations; partner markers are potential processing partners or initiatives; Gangyal is a proposed site only. None of these markers indicates a confirmed agreement or operational facility.</p>
+            <div class="planning-map-tools">
+              <label class="planning-search"><span>Search locations</span><input id="location-search" type="search" placeholder="Temple, initiative or area" autocomplete="off"></label>
+              <fieldset class="planning-filters"><legend>Show on map and in the list</legend>
+                <label><input class="category-filter" type="checkbox" value="temple" checked><span class="map-key map-key-temple">T</span> Temples / collection points</label>
+                <label><input class="category-filter" type="checkbox" value="partner" checked><span class="map-key map-key-partner">P</span> Potential partners / initiatives</label>
+                <label><input class="category-filter" type="checkbox" value="site" checked><span class="map-key map-key-site">S</span> Proposed processing site</label>
+              </fieldset>
+            </div>
+            <div class="planning-map-layout">
+              <div id="network-map" class="network-map" role="region" aria-label="Interactive map of eight supplied temple, potential partner and proposed-site coordinates"></div>
+              <aside class="location-panel" aria-label="Map locations">
+                <h4>Locations <span id="location-count"></span></h4>
+                <div id="location-list" class="location-list" role="list"></div>
+                <div id="selected-location-detail" class="selected-location-detail" aria-live="polite"></div>
+              </aside>
+            </div>
+            <div class="network-map-footer"><span>Map tiles © OpenStreetMap contributors</span><a class="text-link" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Attribution <span aria-hidden="true">↗</span></a></div>
+          </div>
+          <section class="planning-dashboard" aria-labelledby="planning-title">
+            <div class="planning-heading"><div><span class="mini-label">WORKBOOK-BASED ESTIMATES · FOUR TEMPLES</span><h3 id="planning-title">Temple bin planning and pickup management</h3><p>Switch day type to compare estimated visitor counts, flower waste, bin cover and pickup planning.</p></div>
+              <div class="day-selector" role="group" aria-label="Select planning day type">
+                <button type="button" data-planning-day="ordinary" aria-pressed="true">Ordinary day</button>
+                <button type="button" data-planning-day="tuesday" aria-pressed="false">Tuesday</button>
+                <button type="button" data-planning-day="festival" aria-pressed="false">Festival day</button>
+              </div>
+            </div>
+            <div id="planning-summary" class="planning-summary"></div>
+            <div id="temple-planning-cards" class="temple-planning-grid"></div>
+            <div class="pickup-timing-note"><strong>Pickup-time check:</strong> the workbook models a 6-hour gap (12 accumulation hours ÷ 2 pickups), but its default 10:00 AM and 8:00 PM pickup times are 10 hours apart on the clock. Both workbook values are retained; the 6-hour model result is not a promise about real freshness or a claim that the displayed times are 6 hours apart.</div>
+            <details class="planning-methodology"><summary>Methodology and assumptions</summary>
+              <div class="methodology-grid">
+                <div><h4>Model inputs and calculation</h4><ul><li>20 kg rated container (cleaning-worker input) and about 95% maximum fill (team field input) produce a calculated usable capacity of 19 kg. The workbook's minimum of 2 permanent bins is a team decision for placing bins at different points, such as floors and entry/exit gates.</li><li>12 accumulation hours and 2 daily pickup rounds are workbook inputs; the latter is attributed to a cleaning worker. The 24-hour freshness limit is an assumption based on the workbook note that flowers rot within 24–48 hours.</li><li>Default pickup times 10:00 AM (after the morning rush) and 8:00 PM (after evening aarti) are assumptions in the workbook. The modelled interval is 12 ÷ 2 = 6 hours.</li><li>Permanent bins = the largest of ordinary- and Tuesday-gap requirements, the minimum 2 bins, and the ceiling of the busier regular-day footfall ÷ 500. The 500-visitors-per-bin rule is an assumption, not a measured standard.</li><li>Festival bins are permanent bins plus the workbook's temple-specific temporary-bin decisions, subject to the calculated festival interval requirement. Daily waste = estimated visitors × estimated kg per visitor; accumulation rate = daily waste ÷ 12 hours.</li><li>Bins needed for one pickup gap = round up (kg/hour × 6 hours ÷ 19 kg). Time to fill one bin = 19 kg ÷ kg/hour; time for all bins in place = planned bin count × 19 kg ÷ kg/hour.</li></ul></div>
+                  <div><h4>Source and validation limits</h4><p>These are planning estimates transcribed from the team's attached workbook, not live or independently verified measurements. The workbook cites a Team Warriors, University of Jammu Old City survey (Feb 2024; 68,107 weekly visitors across 30 temples), including its Tuesday index (20.7% of weekly visitors). It cites a festival-waste midpoint of 18.9 and 22.5 kg in Table 4.3.9, with the basis marked unclear, and a 3.21–3.50 kg ordinary-day Ranbireshwar range for all waste types. The workbook's cited source descriptions and temple-specific assumptions are shown in the cards below; they have not been independently checked here.</p><p>Other values, including festival footfall and the 500-visitors-per-bin rule, are assumptions. Validate estimates through temple surveys, collection records and operational trials. The model supports initial planning; it does not establish actual bin deployment, pickup service, flower freshness or a validated operating system. The workbook labels its modelled gap within its assumed freshness limit because 6 hours is less than 24 hours; this is not a freshness guarantee.</p></div>
+              </div>
+            </details>
+          </section>
+          <section class="proposed-flow" aria-labelledby="flow-title">
+            <div class="flow-heading"><div><span class="mini-label">A CONCEPTUAL SYSTEM FLOW</span><h3 id="flow-title">From offering to possible recovery.</h3></div><p>A proposed journey for planning and discussion—not a representation that these steps are already operational.</p></div>
+            <ol class="circular-flow">
+              <li><span>01</span><strong>Temple floral waste</strong><small>Offerings are generated</small></li>
+              <li><span>02</span><strong>Segregate & collect</strong><small>At planned temple bins</small></li>
+              <li><span>03</span><strong>Scheduled pickup</strong><small>Collection and transport concept</small></li>
+              <li><span>04</span><strong>Processing option</strong><small>Potential partners or proposed site</small></li>
+              <li><span>05</span><strong>Possible products</strong><small>Compost, agarbatti, dhoop, dyes or other pathways</small></li>
+            </ol>
+            <p class="flow-disclaimer">Potential organisations are not confirmed partners, and no processing site or product output is represented as approved or operational.</p>
+          </section>
+        </section>
         <section class="impact-section" id="impact"><div class="section-wrap"><div class="section-kicker">MEASURE WHAT IS VERIFIED <span>04 — 05</span></div><div class="impact-header"><h2>Transparent by design.</h2><span class="period-tag">DEMONSTRATION DATA ONLY</span></div><p class="impact-copy">Illustrative workflow totals from fictional demo records. These figures do not represent project activity or environmental impact.</p><div class="impact-metrics"><div><small>Pickup quantities recorded</small><strong>${kg(collected)}</strong><span>Demo records · reported weight</span></div><div><small>Quality-approved output</small><strong>${kg(approved)}</strong><span>Demo records · measured output</span></div><div><small>Confirmed accepted</small><strong>${kg(s.shipments.filter(x => x.status === 'Receipt Confirmed').reduce((n, x) => n + (x.receivedKg || 0), 0))}</strong><span>Demo records · partner-confirmed</span></div><div><small>Verified participation</small><strong>—</strong><span>No verified data available</span></div></div></div></section>
         <section class="resources-section section-wrap" id="resources"><div class="section-kicker">RESOURCES <span>05 — 05</span></div><div class="resource-row"><div><span class="mini-label">METHODOLOGY & REPORTING</span><h2>Evidence before claims.</h2></div><div><p>Reports, measurement definitions and educational resources will be published as they become available. No project reports have been added yet.</p><span class="empty-inline">No resources available</span></div></div></section>
-        <section class="faq-section section-wrap" id="faq"><div class="section-kicker">PRACTICAL QUESTIONS <span>POLICIES</span></div><div class="faq-grid"><div><span class="mini-label">FAQ & RESPONSIBILITY</span><h2>Clear expectations<br>at every handover.</h2><p>Project procedures and formal policies should be agreed with participating organisations before operations begin.</p></div><div class="faq-list"><details><summary>How are quantities verified?</summary><p>Collection reports and facility net weights are separate records. Differences require a note and review; processing output is divided into usable, rejected and loss quantities.</p></details><details><summary>Is vehicle location tracked?</summary><p>The map can show static fictional demonstration pins when Google Maps is configured; it does not track vehicles or show verified partner locations. Production tracking requires explicit driver consent, defined tracking periods and protected location history.</p></details><details><summary>What if a delivery quantity differs?</summary><p>The receiving partner records actual quantity and outcome. A difference remains disputed, creates an operations alert and is not counted as accepted stock.</p></details><details><summary>How is demo information handled?</summary><p>Sample workflow changes stay in this browser's local storage. Do not enter personal, confidential or real operational data. There is no account security or server-side access control.</p></details><details id="privacy"><summary>Privacy notice</summary><p>This prototype has no server-side collection, analytics, GPS or messaging integration. A production privacy notice must explain data use, retention, access, evidence storage, tracking consent and contact routes after those services are configured.</p></details><details id="terms"><summary>Terms and partner responsibilities</summary><p>These demo screens do not establish service, payment, safety, quality or dispute terms. Participating organisations should approve written procedures and obtain local legal review before use.</p></details></div></div></section>
+        <section class="faq-section section-wrap" id="faq"><div class="section-kicker">PRACTICAL QUESTIONS <span>POLICIES</span></div><div class="faq-grid"><div><span class="mini-label">FAQ & RESPONSIBILITY</span><h2>Clear expectations<br>at every handover.</h2><p>Project procedures and formal policies should be agreed with participating organisations before operations begin.</p></div><div class="faq-list"><details><summary>How are quantities verified?</summary><p>Collection reports and facility net weights are separate records. Differences require a note and review; processing output is divided into usable, rejected and loss quantities.</p></details><details><summary>Is vehicle location tracked?</summary><p>The Jammu map shows the supplied static temple, potential-initiative and proposed-site locations. It does not track vehicles, verify operational status or show approved routes. The basic map uses OpenStreetMap and does not require a paid API key.</p></details><details><summary>What if a delivery quantity differs?</summary><p>The receiving partner records actual quantity and outcome. A difference remains disputed, creates an operations alert and is not counted as accepted stock.</p></details><details><summary>How is demo information handled?</summary><p>Sample workflow changes stay in this browser's local storage. Do not enter personal, confidential or real operational data. There is no account security or server-side access control.</p></details><details id="privacy"><summary>Privacy notice</summary><p>This prototype has no server-side collection, analytics, GPS or messaging integration. A production privacy notice must explain data use, retention, access, evidence storage, tracking consent and contact routes after those services are configured.</p></details><details id="terms"><summary>Terms and partner responsibilities</summary><p>These demo screens do not establish service, payment, safety, quality or dispute terms. Participating organisations should approve written procedures and obtain local legal review before use.</p></details></div></div></section>
         <section class="contact-section" id="contact"><div class="section-wrap contact-grid contact-grid-enquiry"><div><span class="mini-label">WORK WITH THE NETWORK</span><h2>Contribute floral waste<br>or submit an enquiry.</h2><p>Flower shops, temples, individuals and organisations can tell us about floral waste donations or sales, regular collection, partnerships, or another enquiry.</p><p>Share your contact details and, where relevant, the material, estimated quantity, location and collection frequency.</p></div><div class="contact-action"><form class="public-enquiry-form" data-form="contact" aria-describedby="enquiry-storage-notice enquiry-feedback"><h3>Contribution enquiry</h3><p class="enquiry-form-intro">Fields marked <i>*</i> are required.</p><div class="public-enquiry-fields"><label class="form-field"><span>Full name <i>*</i></span><input name="fullName" type="text" required minlength="2" maxlength="100" autocomplete="name" placeholder="Your full name"></label><label class="form-field"><span>Mobile number <i>*</i></span><input name="mobile" type="tel" required inputmode="tel" autocomplete="tel" maxlength="20" pattern="\\+?[0-9\\s\\(\\)\\.\\-]{7,20}" placeholder="+91 98765 43210"></label><label class="form-field"><span>Email address <i>*</i></span><input name="email" type="email" required maxlength="254" autocomplete="email" placeholder="you@example.in"></label><label class="form-field"><span>Organization / shop name</span><input name="organization" type="text" maxlength="120" autocomplete="organization" placeholder="Optional"></label><label class="form-field"><span>Stakeholder type <i>*</i></span><select name="stakeholderType" required><option value="">Choose one</option><option>Flower shopkeeper</option><option>Temple</option><option>Individual</option><option>Organization</option><option>Other</option></select></label><label class="form-field"><span>Purpose of enquiry <i>*</i></span><select name="purpose" required><option value="">Choose one</option><option>Donate floral waste</option><option>Sell floral waste</option><option>Arrange regular collection</option><option>Partner with Floral Circular</option><option>General enquiry</option></select></label><label class="form-field form-field-wide"><span>Floral waste details</span><textarea name="floralDetails" rows="3" maxlength="1000" placeholder="Optional: flower types, estimated quantity, location, collection frequency, handling needs"></textarea><small class="field-hint">Share only what is relevant; up to 1,000 characters.</small></label><label class="form-field form-field-wide"><span>Additional message</span><textarea name="message" rows="3" maxlength="2000" placeholder="Anything else you would like us to know?"></textarea></label></div><p class="enquiry-storage-notice" id="enquiry-storage-notice"><strong>Demonstration only:</strong> This site has no backend or secure database. Do not enter real personal or confidential information; submissions are stored only in this browser and are not shared with an operations team.</p><p class="enquiry-feedback" id="enquiry-feedback" role="status" aria-live="polite"></p><button class="button button-primary enquiry-submit" type="submit">Submit enquiry</button></form></div></div></section>
       </main>
       <footer class="public-footer"><a class="brand-lockup" href="#home">${icon}<span><strong>FLORAL CIRCULAR</strong><small>FROM OFFERING TO OPPORTUNITY</small></span></a><span>Coordination for a more accountable circular supply chain.</span><div><a href="#about">About</a><a href="#process">Process</a><a href="#faq">FAQ</a><a href="#privacy">Privacy</a><a href="#terms">Terms</a><button data-action="login">Portal login</button><a href="#contact">Contact</a></div><small class="footer-note">Demo interface · Sample data is fictional · Policies require local legal review</small></footer>`;
-          loadGoogleMaps();
+          initializePlanningMap();
+          updatePlanningExperience();
         }
 
-        function setGoogleMapsStatus(state, message) {
-          const status = document.getElementById('google-map-status');
+        function setPlanningMapStatus(state, message) {
+          const status = document.getElementById('planning-map-status');
           if (!status) return;
           status.dataset.state = state;
           status.textContent = message;
         }
 
-        function initializeOpenStreetMap(fallbackMessage) {
+        function destroyPlanningMap() {
+          clearTimeout(planningTileTimer);
+          if (planningResizeObserver) planningResizeObserver.disconnect();
+          if (planningResizeHandler) window.removeEventListener('resize', planningResizeHandler);
+          planningResizeObserver = null;
+          planningResizeHandler = null;
+          planningSpiderLayers.forEach(layer => layer.remove());
+          if (planningMap) planningMap.remove();
+          planningMap = null;
+          planningMarkers = new Map();
+          planningSpiderLayers = [];
+          activePlanningPopup = null;
+        }
+
+        function categoryLabel(category) {
+          return ({ temple: 'Temple / collection point', partner: 'Potential processing partner or initiative', site: 'Proposed processing site' })[category];
+        }
+
+        function locationDirectionUrl(location) {
+          return `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
+        }
+
+        function locationPopup(location) {
+          const templePlan = location.templeId ? planning.getPlan(location.templeId, planningDay) : null;
+          const estimate = templePlan
+            ? `<p>Estimated ${planningDayLabels[planningDay].toLowerCase()} waste: <strong>${formatPlanningKg(templePlan.wasteKgPerDay)}</strong> · planned bins: <strong>${templePlan.plannedBins}</strong></p>`
+            : '';
+          return `<div class="planning-popup"><strong>${esc(location.name)}</strong><small>${esc(categoryLabel(location.category))}</small><p>${esc(location.role)}</p>${estimate}<small>${location.lat}, ${location.lng}</small><a href="${locationDirectionUrl(location)}" target="_blank" rel="noopener noreferrer">Directions ↗</a></div>`;
+        }
+
+        function initializePlanningMap() {
           const mapElement = document.getElementById('network-map');
           if (!mapElement) return;
           if (!window.L) {
-            clearTimeout(mapTilesTimer);
-            setGoogleMapsStatus('error', 'Map tiles could not be loaded. Check your internet connection.');
+            setPlanningMapStatus('error', 'The map library is unavailable. The searchable location list and planning data remain usable.');
             return;
           }
-
-          if (fallbackMapElement === mapElement && fallbackMap) {
-            if (fallbackMapReady) {
-              setGoogleMapsStatus('ready', fallbackMessage || 'Interactive map is working (OpenStreetMap).');
-            }
-            return;
-          }
-
-          clearTimeout(mapTilesTimer);
-          if (fallbackMap) fallbackMap.remove();
-          mapElement.replaceChildren();
+          destroyPlanningMap();
           try {
-            const map = window.L.map(mapElement).setView([32.7266, 74.8570], 13);
-            fallbackMap = map;
-            fallbackMapElement = mapElement;
-            fallbackMapReady = false;
+            const map = window.L.map(mapElement, { scrollWheelZoom: true });
+            planningMap = map;
             const tileLayer = window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
               maxZoom: 19,
               attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
             }).addTo(map);
 
-            demoMapLocations.forEach(location => {
-              window.L.marker([location.lat, location.lng])
-                .addTo(map)
-                .bindPopup(`${esc(location.name)} · demonstration only`);
+            planning.locations.forEach(location => {
+              const marker = window.L.marker([location.lat, location.lng], {
+                title: location.name,
+                icon: planningMarkerIcon(location)
+              });
+              marker.on('click', () => selectPlanningLocation(location.id, true));
+              planningMarkers.set(location.id, marker);
             });
 
-            setGoogleMapsStatus('loading', 'Loading interactive OpenStreetMap…');
-            mapTilesTimer = setTimeout(() => {
-              setGoogleMapsStatus('error', 'Map tiles are not loading. Check your internet connection.');
+            const bounds = window.L.latLngBounds(planning.locations.map(location => [location.lat, location.lng]));
+            map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14 });
+            map.on('zoomend moveend', refreshPlanningMarkers);
+            refreshPlanningMarkers();
+            setPlanningMapStatus('loading', 'Loading OpenStreetMap tiles…');
+            planningTileTimer = setTimeout(() => {
+              if (planningMap === map) setPlanningMapStatus('error', 'Map tiles are not loading. Check your internet connection; the location list and bin plan remain usable.');
             }, 12000);
-            tileLayer.once('load', () => {
-              if (fallbackMap !== map) return;
-              fallbackMapReady = true;
-              clearTimeout(mapTilesTimer);
-              setGoogleMapsStatus('ready', fallbackMessage || 'Interactive map is working (OpenStreetMap).');
+            tileLayer.once('tileload', () => {
+              if (planningMap !== map) return;
+              clearTimeout(planningTileTimer);
+              setPlanningMapStatus('ready', 'OpenStreetMap is ready · all locations plotted.');
             });
-          } catch (error) {
-            clearTimeout(mapTilesTimer);
-            setGoogleMapsStatus('error', 'The interactive map could not be initialized. Check your internet connection and reload.');
-          }
-        }
-
-        function initializeGoogleMap() {
-          const mapElement = document.getElementById('network-map');
-          if (!mapElement) return;
-          if (!window.google?.maps || googleMapsAuthFailed) {
-            initializeOpenStreetMap('Google Maps is unavailable; OpenStreetMap is working.');
-            return;
-          }
-
-          clearTimeout(mapTilesTimer);
-          setGoogleMapsStatus('loading', 'Google Maps loaded; waiting for map tiles…');
-
-          try {
-            const center = { lat: 32.7266, lng: 74.8570 };
-            const map = new window.google.maps.Map(mapElement, {
-              center,
-              zoom: 13,
-              mapTypeControl: false,
-              streetViewControl: false,
-              fullscreenControl: true
+            tileLayer.once('tileerror', () => {
+              if (planningMap === map) setPlanningMapStatus('error', 'Some map tiles could not load. Check your connection; locations remain available in the list.');
             });
-            const infoWindow = new window.google.maps.InfoWindow();
-            demoMapLocations.forEach(location => {
-              const marker = new window.google.maps.Marker({
-                map,
-                position: { lat: location.lat, lng: location.lng },
-                title: location.name
+            if (window.ResizeObserver) {
+              planningResizeObserver = new ResizeObserver(() => {
+                if (planningMap !== map) return;
+                map.invalidateSize({ pan: false });
+                map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: false });
               });
-              marker.addListener('click', () => {
-                const label = document.createElement('strong');
-                label.textContent = location.name + ' · demonstration only';
-                infoWindow.setContent(label);
-                infoWindow.open({ map, anchor: marker });
-              });
-            });
-
-            let tilesLoaded = false;
-            map.addListener('tilesloaded', () => {
-              tilesLoaded = true;
-              clearTimeout(mapTilesTimer);
-              if (!googleMapsAuthFailed) {
-                setGoogleMapsStatus('ready', 'Google Maps is working.');
-              }
-            });
-            if (!tilesLoaded && !googleMapsAuthFailed) {
-              mapTilesTimer = setTimeout(() => {
-                initializeOpenStreetMap('Google Maps did not load; OpenStreetMap is working instead.');
-              }, 12000);
+              planningResizeObserver.observe(mapElement);
             }
+            planningResizeHandler = () => {
+              if (planningMap !== map) return;
+              map.invalidateSize({ pan: false });
+              map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: false });
+            };
+            window.addEventListener('resize', planningResizeHandler);
+            setTimeout(() => {
+              if (planningMap !== map) return;
+              map.invalidateSize({ pan: false });
+              map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: false });
+            }, 0);
           } catch (error) {
-            initializeOpenStreetMap('Google Maps could not start; OpenStreetMap is working instead.');
+            destroyPlanningMap();
+            console.error('Unable to initialize the planning map.', error);
+            setPlanningMapStatus('error', `The map could not be initialized (${error.message}). The location list and planning data remain usable.`);
           }
         }
 
-        function loadGoogleMaps() {
-          const configuredKey = window.FloralMapsConfig?.googleMapsApiKey;
-          const apiKey = typeof configuredKey === 'string' ? configuredKey.trim() : '';
-          if (!apiKey) {
-            initializeOpenStreetMap('Interactive map is working (OpenStreetMap). Google Maps requires an API key.');
-            return;
-          }
-          if (window.google?.maps) {
-            initializeGoogleMap();
-            return;
-          }
-
-          setGoogleMapsStatus('loading', 'Connecting to Google Maps…');
-          if (!googleMapsLoadPromise) {
-            googleMapsLoadPromise = new Promise((resolve, reject) => {
-              window.floralGoogleMapsReady = resolve;
-              googleMapsAuthFailed = false;
-              window.gm_authFailure = () => {
-                googleMapsAuthFailed = true;
-                initializeOpenStreetMap('Google Maps authentication failed; OpenStreetMap is working instead.');
-              };
-              const script = document.createElement('script');
-              script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&callback=floralGoogleMapsReady`;
-              script.async = true;
-              script.defer = true;
-              script.onerror = () => reject(new Error('Google Maps JavaScript API failed to load.'));
-              document.head.appendChild(script);
-            }).catch(error => {
-              googleMapsLoadPromise = null;
-              throw error;
-            });
-          }
-
-          googleMapsLoadPromise.then(initializeGoogleMap).catch(() => {
-            initializeOpenStreetMap('Google Maps could not be loaded; OpenStreetMap is working instead.');
+        function planningMarkerIcon(location) {
+          const selected = location.id === selectedLocationId;
+          const symbol = ({ temple: 'T', partner: 'P', site: 'S' })[location.category];
+          return window.L.divIcon({
+            className: `planning-marker-container${selected ? ' planning-marker-selected' : ''}`,
+            html: `<span class="planning-marker planning-marker-${location.category}" aria-hidden="true">${symbol}</span>`,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11],
+            popupAnchor: [0, -12]
           });
+        }
+
+        function formatPlanningKg(value) {
+          return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 3 }) + ' kg';
+        }
+
+        function formatPlanningNumber(value) {
+          return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 1 });
+        }
+
+        function formatPlanningRate(value) {
+          return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 3 });
+        }
+
+        function formatPlanningHours(value) {
+          if (!Number.isFinite(value)) return '—';
+          return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 1 }) + ' h';
+        }
+
+        function formatPickupTime(value) {
+          const [hours, minutes] = value.split(':').map(Number);
+          const suffix = hours >= 12 ? 'PM' : 'AM';
+          return `${hours % 12 || 12}:${String(minutes).padStart(2, '0')} ${suffix}`;
+        }
+
+        function getVisibleCategories() {
+          return new Set(Array.from(document.querySelectorAll('.category-filter:checked'), input => input.value));
+        }
+
+        function renderLocationList() {
+          const list = document.getElementById('location-list');
+          if (!list) return;
+          const query = (document.getElementById('location-search')?.value || '').trim().toLocaleLowerCase();
+          const visibleCategories = getVisibleCategories();
+          const filtered = planning.locations.filter(location =>
+            visibleCategories.has(location.category) &&
+            `${location.name} ${categoryLabel(location.category)} ${location.role}`.toLocaleLowerCase().includes(query)
+          );
+          document.getElementById('location-count').textContent = `(${filtered.length})`;
+          list.innerHTML = filtered.length
+            ? filtered.map(location => `<button type="button" role="listitem" class="location-list-item${selectedLocationId === location.id ? ' is-selected' : ''}" data-action="select-planning-location" data-id="${esc(location.id)}" aria-pressed="${selectedLocationId === location.id}"><span class="map-key map-key-${location.category}">${({ temple: 'T', partner: 'P', site: 'S' })[location.category]}</span><span><strong>${esc(location.name)}</strong><small>${esc(categoryLabel(location.category))}</small></span><span aria-hidden="true">›</span></button>`).join('')
+            : '<p class="location-empty">No locations match these filters.</p>';
+        }
+
+        function updateLocationDetails() {
+          const panel = document.getElementById('selected-location-detail');
+          if (!panel) return;
+          const location = planning.locations.find(item => item.id === selectedLocationId);
+          if (!location) {
+            panel.innerHTML = '<p>Select a location to view its role and details.</p>';
+            return;
+          }
+          const plan = location.templeId ? planning.getPlan(location.templeId, planningDay) : null;
+          const planningDetails = plan
+            ? `<div class="location-plan-summary"><strong>${esc(planningDayLabels[planningDay])} estimate</strong><span>${formatPlanningKg(plan.wasteKgPerDay)} · ${plan.plannedBins} planned bin${plan.plannedBins === 1 ? '' : 's'}</span><small>${plan.permanentBins} permanent${plan.temporaryFestivalBins ? ` + ${plan.temporaryFestivalBins} temporary festival` : ''} · pickup ${formatPickupTime(planning.parameters.morningPickup)} and ${formatPickupTime(planning.parameters.eveningPickup)}</small></div>`
+            : '<p class="no-location-plan">No bin counts, footfall estimates or pickup schedule are assigned to this location.</p>';
+          panel.innerHTML = `<span class="mini-label">${esc(categoryLabel(location.category))}</span><h4>${esc(location.name)}</h4><p>${esc(location.role)}</p><small class="location-coordinates">${location.lat}, ${location.lng}</small>${planningDetails}<a href="${locationDirectionUrl(location)}" target="_blank" rel="noopener noreferrer">Directions to this point ↗</a>`;
+        }
+
+        function updateCategoryMarkers() {
+          refreshPlanningMarkers();
+        }
+
+        function refreshPlanningMarkers() {
+          if (!planningMap) return;
+          planningSpiderLayers.forEach(layer => layer.remove());
+          planningSpiderLayers = [];
+          planningMarkers.forEach((marker, locationId) => {
+            const location = planning.locations.find(item => item.id === locationId);
+            if (location) marker.setIcon(planningMarkerIcon(location));
+            marker.removeFrom(planningMap);
+          });
+
+          const visibleCategories = getVisibleCategories();
+          const points = planning.locations
+            .filter(location => visibleCategories.has(location.category))
+            .map(location => ({
+              location,
+              point: planningMap.latLngToContainerPoint([location.lat, location.lng])
+            }));
+          const parents = points.map((_, index) => index);
+          const find = index => parents[index] === index ? index : (parents[index] = find(parents[index]));
+          const join = (left, right) => { parents[find(left)] = find(right); };
+
+          for (let left = 0; left < points.length; left++) {
+            for (let right = left + 1; right < points.length; right++) {
+              if (points[left].point.distanceTo(points[right].point) < 26) join(left, right);
+            }
+          }
+
+          const groups = new Map();
+          points.forEach((item, index) => {
+            const root = find(index);
+            if (!groups.has(root)) groups.set(root, []);
+            groups.get(root).push(item);
+          });
+
+          groups.forEach(group => {
+            if (group.length === 1) {
+              planningMarkers.get(group[0].location.id).addTo(planningMap);
+              return;
+            }
+
+            // Fan out overlapping symbols visually while each connector remains anchored to its exact coordinate.
+            const center = group.reduce((sum, item) => sum.add(item.point), window.L.point(0, 0)).divideBy(group.length);
+            const radius = Math.max(28, group.length * 10);
+            group.forEach(({ location }, index) => {
+              const angle = (index / group.length) * Math.PI * 2 - Math.PI / 2;
+              const displayPoint = center.add(window.L.point(Math.cos(angle) * radius, Math.sin(angle) * radius));
+              const displayPosition = planningMap.containerPointToLatLng(displayPoint);
+              const originalPosition = window.L.latLng(location.lat, location.lng);
+              const leg = window.L.polyline([originalPosition, displayPosition], {
+                color: '#69766a',
+                weight: 1,
+                opacity: 0.75,
+                interactive: false
+              }).addTo(planningMap);
+              const marker = window.L.marker(displayPosition, {
+                title: location.name,
+                icon: planningMarkerIcon(location),
+                riseOnHover: true,
+                zIndexOffset: 500
+              }).addTo(planningMap);
+              marker.on('click', () => selectPlanningLocation(location.id, true));
+              planningSpiderLayers.push(leg, marker);
+            });
+          });
+        }
+
+        function updatePlanningDashboard() {
+          const summary = planning.getSummary(planningDay);
+          const summaryElement = document.getElementById('planning-summary');
+          const cardsElement = document.getElementById('temple-planning-cards');
+          if (!summaryElement || !cardsElement) return;
+
+          summaryElement.innerHTML = `
+            <article><span>Estimated waste · ${esc(planningDayLabels[planningDay])}</span><strong>${formatPlanningKg(summary.wasteKgPerDay)}</strong><small>Across four temples · planning estimate</small></article>
+            <article><span>Permanent bins</span><strong>${summary.permanentBins}</strong><small>Planned year-round · not deployed</small></article>
+            <article><span>Festival-only extra bins</span><strong>${summary.extraFestivalBins}</strong><small>Temporary planning total across four temples</small></article>
+            <article><span>Bins planned · ${esc(planningDayLabels[planningDay])}</span><strong>${summary.plannedBins}</strong><small>${planningDay === 'festival' ? `${summary.permanentBins} permanent + ${summary.extraFestivalBins} temporary` : 'Permanent bins only for regular operations'}</small></article>`;
+
+          cardsElement.innerHTML = summary.plans.map(plan => `
+            <article class="temple-plan-card${selectedTempleId === plan.temple.id ? ' is-selected' : ''}">
+              <div class="temple-plan-title"><div><span class="mini-label">${plan.temple.id === 'raghunath' ? 'MAP: SHRI RAGHUNATH TEMPLE' : 'TEMPLE BIN PLAN'}</span><h4>${esc(plan.temple.name)}</h4></div><button type="button" class="text-link" data-action="select-planning-temple" data-id="${esc(plan.temple.id)}" aria-pressed="${selectedTempleId === plan.temple.id}">View on map <span aria-hidden="true">↗</span></button></div>
+              <div class="temple-plan-primary"><div><small>Estimated daily floral waste</small><strong>${formatPlanningKg(plan.wasteKgPerDay)}</strong></div><div><small>Estimated visitors</small><strong>${formatPlanningNumber(plan.footfall)}</strong></div></div>
+              <div class="temple-plan-stats">
+                <div><span>Accumulation rate</span><strong>${formatPlanningRate(plan.accumulationKgPerHour)} kg/h</strong></div>
+                <div><span>One bin may fill in</span><strong>${formatPlanningHours(plan.hoursToFillOneBin)}</strong></div>
+                <div><span>Bins for modelled ${planning.parameters.modelledPickupGapHours} h gap</span><strong>${plan.binsNeededPerPickup}</strong></div>
+                <div><span>Time until all planned bins may fill</span><strong>${formatPlanningHours(plan.hoursUntilAllBinsFull)}</strong></div>
+              </div>
+              <div class="temple-bin-count"><span>Permanent bins <strong>${plan.permanentBins}</strong></span>${plan.temporaryFestivalBins ? `<span>Festival-only extra <strong>${plan.temporaryFestivalBins}</strong></span>` : ''}<span>Planned on site <strong>${plan.plannedBins}</strong></span></div>
+              <div class="temple-pickup-schedule"><span>Planned pickups · ${planning.parameters.pickupsPerDay}/day</span><strong>${formatPickupTime(planning.parameters.morningPickup)} <i>·</i> ${formatPickupTime(planning.parameters.eveningPickup)}</strong></div>
+              <details class="temple-source-notes"><summary>Workbook basis and source notes</summary><p><strong>Footfall:</strong> ${esc(plan.temple.footfallBasis)}</p><p><strong>Waste per visitor:</strong> ${esc(plan.temple.wasteBasis)}</p><p><strong>Festival extra bins:</strong> ${plan.temple.extraFestivalBins} temporary bins; a team decision recorded in the workbook, not a permanent-bin count.</p></details>
+            </article>`).join('');
+
+          document.querySelectorAll('[data-planning-day]').forEach(button => {
+            const active = button.dataset.planningDay === planningDay;
+            button.setAttribute('aria-pressed', String(active));
+          });
+          updateLocationDetails();
+          if (planningMap) {
+            refreshPlanningMarkers();
+            const location = planning.locations.find(item => item.id === selectedLocationId);
+            if (activePlanningPopup && location) activePlanningPopup.setContent(locationPopup(location));
+          }
+        }
+
+        function updatePlanningExperience() {
+          renderLocationList();
+          updateLocationDetails();
+          updatePlanningDashboard();
+        }
+
+        function selectPlanningLocation(locationId, moveMap) {
+          const location = planning.locations.find(item => item.id === locationId);
+          if (!location) return;
+          selectedLocationId = location.id;
+          selectedTempleId = location.templeId || null;
+          updatePlanningExperience();
+          if (planningMap && moveMap) {
+            activePlanningPopup = window.L.popup({ maxWidth: 280 })
+              .setLatLng([location.lat, location.lng])
+              .setContent(locationPopup(location))
+              .openOn(planningMap);
+            planningMap.flyTo([location.lat, location.lng], Math.max(planningMap.getZoom(), 14));
+          }
+        }
+
+        function setPlanningDay(dayType) {
+          if (!Object.prototype.hasOwnProperty.call(planningDayLabels, dayType)) return;
+          planningDay = dayType;
+          updatePlanningDashboard();
         }
 
         function pageHeading(eyebrow, title, description, action) {
@@ -441,6 +656,7 @@
   }
 
   function render() {
+    destroyPlanningMap();
     if (!role) publicSite();
     else workspace();
     dialogRoot.innerHTML = '';
@@ -564,18 +780,25 @@
   }
 
   document.addEventListener('click', event => {
-    const target = event.target.closest('[data-action], [data-view], [data-role]');
+    const target = event.target.closest('[data-action], [data-view], [data-role], [data-planning-day]');
     if (!target) return;
+    if (target.dataset.planningDay) { setPlanningDay(target.dataset.planningDay); return; }
     if (target.dataset.role) { role = target.dataset.role; view = role === 'vendor' ? 'today' : 'overview'; render(); return; }
     if (target.dataset.view) { view = target.dataset.view; render(); return; }
     const action = target.dataset.action;
+    if (action === 'select-planning-location') return selectPlanningLocation(target.dataset.id, true);
+    if (action === 'select-planning-temple') {
+      const temple = planning.temples.find(item => item.id === target.dataset.id);
+      if (temple) selectPlanningLocation(temple.locationId, true);
+      return;
+    }
     if (action === 'login' || action === 'switch-role') return openRoles();
     if (action === 'contact') return openContact();
     if (action === 'logout' || action === 'home') { role = null; window.scrollTo(0, 0); render(); return; }
     if (action === 'mobile-menu') return document.querySelector('.public-nav')?.classList.toggle('nav-open');
     if (action === 'sidebar-toggle') return document.querySelector('.sidebar')?.classList.toggle('sidebar-open');
     if (action === 'close-modal') { if (target === event.target || target.closest('.modal')) dialogRoot.innerHTML = ''; return; }
-    if (action === 'about-demo') return openDialog('About this demonstration', 'Floral Circular is a fictional demonstration product. All identities, locations, weights and operational records shown are example data.', '<p class="modal-copy">This prototype stores data in your browser only. It does not provide secure user accounts, server-side role enforcement, live GPS, operational route mapping, messaging, or protected document storage. The optional Google Map shows only fictional sample points and requires a configured API key. Never enter personal or confidential information.</p><p class="modal-copy">Real operations require a backend, a relational database, authenticated organisations, role permissions, audit history and configured integrations.</p>', 'Close', 'info');
+    if (action === 'about-demo') return openDialog('About this demonstration', 'Floral Circular is a demonstration product with a proposed temple collection and bin-planning model.', '<p class="modal-copy">The public map uses the supplied static coordinates and OpenStreetMap tiles; it does not show live GPS, operational routes or verified agreements. Bin, footfall and waste values are workbook-based planning estimates, not measured operating results. The role-based prototype still stores its sample workflow data in this browser only. Never enter personal or confidential information.</p><p class="modal-copy">Real operations require a backend, a relational database, authenticated organisations, role permissions, audit history and configured integrations.</p>', 'Close', 'info');
     if (action === 'reset-demo') { data.resetDemo(); view = role === 'vendor' ? 'today' : 'overview'; toast('Demo data reset to its original sample state.'); render(); return; }
     if (action === 'resolve-alert') { try { data.resolveAlert(target.dataset.id); toast('Alert marked resolved.'); render(); } catch (error) { toast(error.message, true); } return; }
     if (action === 'verify-pickup') { try { data.verifyPickup(target.dataset.id); toast('Pickup verified. Facility intake is now available.'); render(); } catch (error) { toast(error.message, true); } return; }
@@ -585,6 +808,17 @@
     if (action === 'deliver-shipment') { try { data.advanceShipment(target.dataset.id, 'Delivered Awaiting Confirmation'); toast('Delivery evidence recorded. Startup receipt is still pending.'); render(); } catch (error) { toast(error.message, true); } return; }
     if (action === 'export-csv') return exportCsv();
     if (action === 'record-pickup' || action === 'new-pickup' || action === 'new-intake' || action === 'new-batch' || action === 'complete-batch' || action === 'new-shipment' || action === 'confirm-receipt' || action === 'new-feedback' || action === 'new-request' || action === 'new-issue' || action === 'update-enquiry') return openForm(action, target.dataset.id);
+  });
+
+  document.addEventListener('input', event => {
+    if (event.target.id === 'location-search') renderLocationList();
+  });
+
+  document.addEventListener('change', event => {
+    if (event.target.matches('.category-filter')) {
+      renderLocationList();
+      updateCategoryMarkers();
+    }
   });
 
   document.addEventListener('submit', event => {
