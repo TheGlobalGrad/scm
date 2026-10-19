@@ -17,6 +17,11 @@
         let planningMarkers = new Map();
         let planningSpiderLayers = [];
         let activePlanningPopup;
+        let selectedOperationsTempleId = 'raghunath';
+        let operationsMap;
+        let operationsMapResizeObserver;
+        let operationsMapResizeHandler;
+        let operationsMapTileTimer;
 
         const roles = {
             operations: {
@@ -531,7 +536,154 @@
     const pickupRows = todayPickups.map(x => `<tr><td><strong>${esc(x.id)}</strong><small class="cell-sub">${esc(x.source)}</small></td><td>${esc(x.window)}</td><td>${esc(x.vendor)}</td><td>${badge(x.status)}</td><td>${x.quantity == null ? '—' : kg(x.quantity)}</td></tr>`).join('');
     return `${pageHeading('OPERATIONS · JAMMU', 'Good day, Operations', 'A clear view of today’s material movement. All figures below use fictional demonstration records.', button('＋ Schedule pickup', 'new-pickup', 'primary'))}
       <div class="metric-grid">${metric('Pickups completed', `${completed}<em> / ${todayPickups.length}</em>`, 'Today · task count', 'metric-sage')}${metric('Awaiting processing', `${awaiting}<em> batches</em>`, 'Facility · not yet released')}${metric('Awaiting inspection', `${inspection}<em> batches</em>`, 'Quality gate · approval required', 'metric-cream')}${metric('Approved stock', kg(stock), 'Released · available to allocate', 'metric-sage')}${metric('Shipments in transit', transit, 'Vendor handover recorded')}${metric('Open exceptions', exceptions, 'Owner assigned · action required', exceptions ? 'metric-alert' : '')}</div>
+      ${operationsTrackingPanel(s)}
       <div class="dashboard-grid"><div class="dashboard-main">${panel('Today’s collection plan', 'Schedule, source and reported weight', dataTable(['TASK / SOURCE', 'WINDOW', 'ASSIGNED VENDOR', 'STATUS', 'REPORTED'], pickupRows, 'No pickups scheduled for today.'), `<button class="text-button" data-view="collections">View all →</button>`)}${panel('Priority alerts', 'Open exceptions requiring attention', `<div class="alert-list">${alertRows()}</div>`, `<button class="text-button" data-view="alerts">View alert centre →</button>`)}</div><aside class="dashboard-side">${panel('Material journey', 'Current demo workflow status', `<div class="journey-stack"><div><span>01</span><b>Collection tasks</b><strong>${pickups.length}</strong></div><div><span>02</span><b>Facility intakes</b><strong>${s.intakes.length}</strong></div><div><span>03</span><b>Processing batches</b><strong>${s.batches.length}</strong></div><div><span>04</span><b>Shipment records</b><strong>${s.shipments.length}</strong></div></div>`)}${panel('Recent activity', 'Latest recorded updates', activityFeed())}</aside></div>`;
+  }
+
+  function matchingTemplePickups(temple, pickups) {
+    const location = planning.locations.find(item => item.id === temple.locationId);
+    const aliases = [temple.name, location?.name].filter(Boolean).map(name => name.toLocaleLowerCase());
+    if (temple.id === 'raghunath') aliases.push('raghunath', 'ram temple');
+    return pickups
+    .filter(pickup => {
+      const source = String(pickup.source || '').toLocaleLowerCase();
+      return aliases.some(alias => source.includes(alias));
+    })
+    .sort((left, right) => `${right.date} ${right.completedAt || ''}`.localeCompare(`${left.date} ${left.completedAt || ''}`));
+  }
+
+  function operationsTrackingPanel(currentState) {
+    const selectedTemple = planning.temples.find(temple => temple.id === selectedOperationsTempleId) || planning.temples[0];
+    const location = planning.locations.find(item => item.id === selectedTemple.locationId);
+    const destination = planning.locations.find(item => item.id === 'gangyal');
+    const templeRows = planning.temples.map(temple => {
+    const record = matchingTemplePickups(temple, currentState.pickups)[0];
+    const selected = temple.id === selectedTemple.id;
+    const status = record ? badge(record.status) : '<span class="gps-no-record">No linked pickup record</span>';
+    const lastUpdate = record
+      ? `${esc(record.id)} · ${esc(record.date)} ${record.window ? `· ${esc(record.window)}` : ''}`
+      : 'No pickup status is available for this temple in the current records.';
+    return `<button type="button" class="gps-temple-row${selected ? ' is-selected' : ''}" data-action="select-operations-temple" data-id="${esc(temple.id)}" aria-pressed="${selected}"><span class="gps-temple-name"><strong>${esc(temple.name)}</strong><small>${lastUpdate}</small></span><span class="gps-temple-status">${status}</span></button>`;
+    }).join('');
+    return `<section class="operations-tracking" aria-labelledby="operations-tracking-title">
+    <div class="operations-tracking-heading"><div><p class="eyebrow">COLLECTION VISIBILITY · FOUR TEMPLES</p><h2 id="operations-tracking-title">Pickup status & route preview</h2><p>Select a temple to preview its proposed collection-to-site pathway and check the latest linked pickup record.</p></div><span class="gps-feed-badge"><i aria-hidden="true"></i> Live vehicle GPS: not connected</span></div>
+    <div class="gps-demo-notice"><strong>Demo only — not live tracking.</strong> This static site has no driver-device feed or GPS backend. The route line and vehicle symbol are illustrative only; the line is a straight-line connector, not a road route. No real vehicle position, distance, ETA or arrival status is shown.</div>
+    <div class="operations-tracking-grid">
+      <div class="operations-gps-map-wrap">
+        <div class="operations-gps-map-heading"><strong>${esc(selectedTemple.name)} <span aria-hidden="true">→</span> Proposed Processing Site</strong><span class="gps-simulated-label">SIMULATED PATHWAY</span></div>
+        <div id="operations-route-map" class="operations-route-map" role="region" aria-label="Illustrative map pathway from ${esc(location.name)} to proposed Gangyal processing site"></div>
+        <div id="operations-map-status" class="operations-map-status" role="status" aria-live="polite">Loading route preview…</div>
+        <div class="operations-map-legend"><span><i class="route-key-temple">T</i> Temple pickup point</span><span><i class="route-key-site">S</i> Proposed site</span><span><i class="route-key-vehicle">V</i> Simulated marker · not GPS</span></div>
+      </div>
+      <div class="gps-temple-status-panel"><h3>Temple pickup records</h3><p>Only records whose source names a temple are matched. Existing generic collection-point records are not assigned to a temple.</p><div class="gps-temple-list">${templeRows}</div><a class="text-link" href="#" data-view="collections">Open all collection records <span aria-hidden="true">→</span></a></div>
+    </div>
+    <p class="operations-site-disclaimer">Destination: ${esc(destination.name)} — proposed location only, not an approved or operational facility. A production live-GPS view requires an authenticated driver/device location feed and backend integration.</p>
+    </section>`;
+  }
+
+  function setOperationsMapStatus(message, failed) {
+    const status = document.getElementById('operations-map-status');
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.state = failed ? 'error' : 'ready';
+  }
+
+  function destroyOperationsMap() {
+    clearTimeout(operationsMapTileTimer);
+    if (operationsMapResizeObserver) operationsMapResizeObserver.disconnect();
+    if (operationsMapResizeHandler) window.removeEventListener('resize', operationsMapResizeHandler);
+    operationsMapResizeObserver = null;
+    operationsMapResizeHandler = null;
+    if (operationsMap) operationsMap.remove();
+    operationsMap = null;
+  }
+
+  function initializeOperationsTrackingMap() {
+    const mapElement = document.getElementById('operations-route-map');
+    if (!mapElement) return;
+    if (!window.L) {
+    setOperationsMapStatus('Map library unavailable. Temple pickup records remain available in the status list.', true);
+    return;
+    }
+    const selectedTemple = planning.temples.find(temple => temple.id === selectedOperationsTempleId) || planning.temples[0];
+    const origin = planning.locations.find(location => location.id === selectedTemple.locationId);
+    const destination = planning.locations.find(location => location.id === 'gangyal');
+    if (!origin || !destination) {
+    setOperationsMapStatus('The selected route endpoints are unavailable.', true);
+    return;
+    }
+    try {
+    const map = window.L.map(mapElement, { scrollWheelZoom: true });
+    operationsMap = map;
+    const bounds = window.L.latLngBounds([[origin.lat, origin.lng], [destination.lat, destination.lng]]);
+    const tiles = window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+    }).addTo(map);
+    window.L.polyline([[origin.lat, origin.lng], [destination.lat, destination.lng]], {
+      color: '#517b56',
+      weight: 4,
+      opacity: 0.8,
+      dashArray: '8 8'
+    }).addTo(map);
+    window.L.marker([origin.lat, origin.lng], {
+      title: origin.name,
+      icon: operationsMapIcon('T', 'temple')
+    }).addTo(map).bindPopup(`<strong>${esc(origin.name)}</strong><br>Temple pickup point · exact supplied coordinate`);
+    window.L.marker([destination.lat, destination.lng], {
+      title: 'Proposed Processing Site',
+      icon: operationsMapIcon('S', 'site')
+    }).addTo(map).bindPopup('<strong>Proposed Processing Site</strong><br>Gangyal Industrial Area · proposed location only');
+    const demoPosition = [
+      origin.lat + (destination.lat - origin.lat) * 0.42,
+      origin.lng + (destination.lng - origin.lng) * 0.42
+    ];
+    window.L.marker(demoPosition, {
+      title: 'Illustrative simulated marker — not live GPS',
+      icon: operationsMapIcon('V', 'vehicle'),
+      zIndexOffset: 500
+    }).addTo(map).bindPopup('<strong>Illustrative demo marker</strong><br>This is not a live or measured vehicle location.');
+    map.fitBounds(bounds, { padding: [35, 35], maxZoom: 13 });
+    if (window.ResizeObserver) {
+      operationsMapResizeObserver = new ResizeObserver(() => {
+        if (operationsMap !== map) return;
+        map.invalidateSize({ pan: false });
+        map.fitBounds(bounds, { padding: [35, 35], maxZoom: 13, animate: false });
+      });
+      operationsMapResizeObserver.observe(mapElement);
+    }
+    operationsMapResizeHandler = () => {
+      if (operationsMap !== map) return;
+      map.invalidateSize({ pan: false });
+      map.fitBounds(bounds, { padding: [35, 35], maxZoom: 13, animate: false });
+    };
+    window.addEventListener('resize', operationsMapResizeHandler);
+    tiles.once('tileload', () => {
+      if (operationsMap !== map) return;
+      clearTimeout(operationsMapTileTimer);
+      setOperationsMapStatus('OpenStreetMap loaded · pathway is illustrative, not a road route or live GPS track.', false);
+    });
+    tiles.once('tileerror', () => {
+      if (operationsMap === map) setOperationsMapStatus('Map tiles are unavailable. The pickup list remains available; no live GPS feed is connected.', true);
+    });
+    setOperationsMapStatus('OpenStreetMap · straight-line demo pathway · no live GPS feed connected.', false);
+    operationsMapTileTimer = setTimeout(() => {
+      if (operationsMap === map) setOperationsMapStatus('Map tiles are taking too long to load. The pickup list remains available.', true);
+    }, 12000);
+    } catch (error) {
+    destroyOperationsMap();
+    console.error('Unable to initialize the operations route preview.', error);
+    setOperationsMapStatus(`Route preview could not be initialized (${error.message}). Pickup records remain available.`, true);
+    }
+  }
+
+  function operationsMapIcon(label, type) {
+    return window.L.divIcon({
+    className: `operations-map-marker operations-map-marker-${type}`,
+    html: `<span>${label}</span>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+    });
   }
 
   function collectionsView() {
@@ -657,8 +809,12 @@
 
   function render() {
     destroyPlanningMap();
+    destroyOperationsMap();
     if (!role) publicSite();
-    else workspace();
+    else {
+      workspace();
+      if (role === 'operations' && view === 'overview') initializeOperationsTrackingMap();
+    }
     dialogRoot.innerHTML = '';
   }
 
@@ -786,6 +942,13 @@
     if (target.dataset.role) { role = target.dataset.role; view = role === 'vendor' ? 'today' : 'overview'; render(); return; }
     if (target.dataset.view) { view = target.dataset.view; render(); return; }
     const action = target.dataset.action;
+    if (action === 'select-operations-temple') {
+      if (planning.temples.some(temple => temple.id === target.dataset.id)) {
+        selectedOperationsTempleId = target.dataset.id;
+        render();
+      }
+      return;
+    }
     if (action === 'select-planning-location') return selectPlanningLocation(target.dataset.id, true);
     if (action === 'select-planning-temple') {
       const temple = planning.temples.find(item => item.id === target.dataset.id);

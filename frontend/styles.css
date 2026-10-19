@@ -3285,3 +3285,323 @@ td strong {
         min-height: 0;
     }
 }
+
+.operations-tracking {
+    margin: 16px 0 20px;
+    padding: 17px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--white);
+}
+
+.operations-tracking-heading {
+    margin-bottom: 13px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.operations-tracking-heading .eyebrow {
+    margin-bottom: 6px;
+}
+
+.operations-tracking-heading h2 {
+    margin: 0;
+    color: var(--forest-deep);
+    font: 700 20px/1.25 "Manrope", sans-serif;
+}
+
+.operations-tracking-heading p:not(.eyebrow) {
+    max-width: 620px;
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+.gps-feed-badge {
+    flex: 0 0 auto;
+    min-height: 30px;
+    padding: 6px 9px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid #ead5bd;
+    border-radius: 3px;
+    background: #fbf2e7;
+    color: #805e36;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.gps-feed-badge i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #bd713e;
+}
+
+.gps-demo-notice {
+    margin-bottom: 14px;
+    padding: 9px 11px;
+    border-left: 3px solid #bc8a3d;
+    background: #faf4e9;
+    color: #685a44;
+    font-size: 9px;
+    line-height: 1.55;
+}
+
+.operations-tracking-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(270px, .8fr);
+    gap: 13px;
+}
+
+.operations-gps-map-wrap,
+.gps-temple-status-panel {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fbfcf9;
+}
+
+.operations-gps-map-heading {
+    min-height: 43px;
+    padding: 9px 11px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.operations-gps-map-heading strong {
+    color: #394b3b;
+    font-size: 10px;
+}
+
+.operations-gps-map-heading strong span {
+    padding: 0 4px;
+    color: var(--leaf);
+}
+
+.gps-simulated-label {
+    flex: 0 0 auto;
+    padding: 4px 6px;
+    border-radius: 2px;
+    background: #edf2e9;
+    color: var(--forest);
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.operations-route-map {
+    width: 100%;
+    height: 310px;
+    background: #edf1e9;
+}
+
+.operations-map-status {
+    min-height: 28px;
+    padding: 7px 10px;
+    border-top: 1px solid var(--border);
+    color: #52654f;
+    font-size: 9px;
+    line-height: 1.45;
+}
+
+.operations-map-status[data-state="error"] {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.operations-map-legend {
+    padding: 8px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 13px;
+    border-top: 1px solid var(--border);
+    color: #687367;
+    font-size: 8px;
+}
+
+.operations-map-legend>span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.route-key-temple,
+.route-key-site,
+.route-key-vehicle {
+    width: 18px;
+    height: 18px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    color: white;
+    font-size: 8px;
+    font-style: normal;
+    font-weight: 800;
+}
+
+.route-key-temple,
+.operations-map-marker-temple span {
+    background: #356d48;
+}
+
+.route-key-site,
+.operations-map-marker-site span {
+    background: #695184;
+}
+
+.route-key-vehicle,
+.operations-map-marker-vehicle span {
+    background: #a15f2e;
+}
+
+.operations-map-marker {
+    border: 0;
+    background: transparent;
+}
+
+.operations-map-marker span {
+    width: 27px;
+    height: 27px;
+    display: grid;
+    place-items: center;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(20, 30, 20, .38);
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.gps-temple-status-panel {
+    padding: 12px;
+}
+
+.gps-temple-status-panel h3 {
+    margin: 0;
+    color: #394b3b;
+    font: 700 12px "Manrope", sans-serif;
+}
+
+.gps-temple-status-panel>p {
+    margin: 6px 0 10px;
+    color: #788174;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.gps-temple-list {
+    border-top: 1px solid var(--border);
+}
+
+.gps-temple-row {
+    width: 100%;
+    min-height: 52px;
+    padding: 8px 5px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    border: 0;
+    border-bottom: 1px solid #edf0ea;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.gps-temple-row:hover,
+.gps-temple-row.is-selected {
+    background: #f0f4ed;
+}
+
+.gps-temple-name {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.gps-temple-name strong {
+    color: #3f4f3f;
+    font-size: 9px;
+    line-height: 1.4;
+}
+
+.gps-temple-name small {
+    color: #7a8477;
+    font-size: 8px;
+    line-height: 1.4;
+}
+
+.gps-temple-status {
+    justify-self: end;
+}
+
+.gps-temple-status .badge {
+    font-size: 8px;
+}
+
+.gps-no-record {
+    max-width: 110px;
+    display: block;
+    color: #8a7758;
+    font-size: 8px;
+    line-height: 1.4;
+    text-align: right;
+}
+
+.gps-temple-status-panel>.text-link {
+    margin-top: 12px;
+    font-size: 9px;
+}
+
+.operations-site-disclaimer {
+    margin: 10px 0 0;
+    color: #7a8377;
+    font-size: 8px;
+    line-height: 1.5;
+}
+
+@media (max-width: 980px) {
+    .operations-tracking-grid {
+        grid-template-columns: 1fr;
+    }
+    .gps-temple-status-panel {
+        max-height: 420px;
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 780px) {
+    .operations-tracking {
+        padding: 12px;
+    }
+    .operations-tracking-heading {
+        flex-direction: column;
+    }
+    .gps-feed-badge {
+        align-self: flex-start;
+    }
+    .operations-route-map {
+        height: 280px;
+    }
+}
+
+@media (max-width: 500px) {
+    .operations-tracking-heading h2 {
+        font-size: 17px;
+    }
+    .operations-gps-map-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .operations-route-map {
+        height: 250px;
+    }
+}
