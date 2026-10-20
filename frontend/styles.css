@@ -1964,6 +1964,10 @@ a {
     display: none;
 }
 
+.workspace-home {
+    display: none;
+}
+
 .workspace-content {
     max-width: 1550px;
     margin: 0 auto;
@@ -2943,6 +2947,9 @@ td strong {
     .sidebar-toggle {
         display: inline-grid;
     }
+    .workspace-home {
+        display: inline-grid;
+    }
     .breadcrumb {
         margin-right: auto;
         margin-left: 10px;
@@ -3434,8 +3441,7 @@ td strong {
 }
 
 .route-key-temple,
-.route-key-site,
-.route-key-vehicle {
+.route-key-site {
     width: 18px;
     height: 18px;
     display: inline-grid;
@@ -3455,11 +3461,6 @@ td strong {
 .route-key-site,
 .operations-map-marker-site span {
     background: #695184;
-}
-
-.route-key-vehicle,
-.operations-map-marker-vehicle span {
-    background: #a15f2e;
 }
 
 .operations-map-marker {

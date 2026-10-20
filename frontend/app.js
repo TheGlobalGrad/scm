@@ -566,18 +566,18 @@
     return `<button type="button" class="gps-temple-row${selected ? ' is-selected' : ''}" data-action="select-operations-temple" data-id="${esc(temple.id)}" aria-pressed="${selected}"><span class="gps-temple-name"><strong>${esc(temple.name)}</strong><small>${lastUpdate}</small></span><span class="gps-temple-status">${status}</span></button>`;
     }).join('');
     return `<section class="operations-tracking" aria-labelledby="operations-tracking-title">
-    <div class="operations-tracking-heading"><div><p class="eyebrow">COLLECTION VISIBILITY · FOUR TEMPLES</p><h2 id="operations-tracking-title">Pickup status & route preview</h2><p>Select a temple to preview its proposed collection-to-site pathway and check the latest linked pickup record.</p></div><span class="gps-feed-badge"><i aria-hidden="true"></i> Live vehicle GPS: not connected</span></div>
-    <div class="gps-demo-notice"><strong>Demo only — not live tracking.</strong> This static site has no driver-device feed or GPS backend. The route line and vehicle symbol are illustrative only; the line is a straight-line connector, not a road route. No real vehicle position, distance, ETA or arrival status is shown.</div>
+    <div class="operations-tracking-heading"><div><p class="eyebrow">COLLECTION VISIBILITY · FOUR TEMPLES</p><h2 id="operations-tracking-title">Pickup status & route preview</h2><p>Select a temple to preview its proposed collection-to-site pathway and check the latest linked pickup record.</p></div><span class="gps-feed-badge"><i aria-hidden="true"></i> GPS tracking: off</span></div>
+    <div class="gps-demo-notice"><strong>No live tracking or location collection.</strong> This demo does not request or collect device location. The dashed line only connects the supplied temple and proposed-site coordinates; it is not a road route. No vehicle position, distance, ETA or arrival status is shown.</div>
     <div class="operations-tracking-grid">
       <div class="operations-gps-map-wrap">
         <div class="operations-gps-map-heading"><strong>${esc(selectedTemple.name)} <span aria-hidden="true">→</span> Proposed Processing Site</strong><span class="gps-simulated-label">SIMULATED PATHWAY</span></div>
         <div id="operations-route-map" class="operations-route-map" role="region" aria-label="Illustrative map pathway from ${esc(location.name)} to proposed Gangyal processing site"></div>
         <div id="operations-map-status" class="operations-map-status" role="status" aria-live="polite">Loading route preview…</div>
-        <div class="operations-map-legend"><span><i class="route-key-temple">T</i> Temple pickup point</span><span><i class="route-key-site">S</i> Proposed site</span><span><i class="route-key-vehicle">V</i> Simulated marker · not GPS</span></div>
+        <div class="operations-map-legend"><span><i class="route-key-temple">T</i> Temple pickup point</span><span><i class="route-key-site">S</i> Proposed site</span><span>Vehicle tracking is off</span></div>
       </div>
       <div class="gps-temple-status-panel"><h3>Temple pickup records</h3><p>Only records whose source names a temple are matched. Existing generic collection-point records are not assigned to a temple.</p><div class="gps-temple-list">${templeRows}</div><a class="text-link" href="#" data-view="collections">Open all collection records <span aria-hidden="true">→</span></a></div>
     </div>
-    <p class="operations-site-disclaimer">Destination: ${esc(destination.name)} — proposed location only, not an approved or operational facility. A production live-GPS view requires an authenticated driver/device location feed and backend integration.</p>
+    <p class="operations-site-disclaimer">Destination: ${esc(destination.name)} — proposed location only, not an approved or operational facility. Live tracking is disabled. Enabling it later would require explicit driver consent, an authenticated device feed and a secured backend.</p>
     </section>`;
   }
 
@@ -634,15 +634,6 @@
       title: 'Proposed Processing Site',
       icon: operationsMapIcon('S', 'site')
     }).addTo(map).bindPopup('<strong>Proposed Processing Site</strong><br>Gangyal Industrial Area · proposed location only');
-    const demoPosition = [
-      origin.lat + (destination.lat - origin.lat) * 0.42,
-      origin.lng + (destination.lng - origin.lng) * 0.42
-    ];
-    window.L.marker(demoPosition, {
-      title: 'Illustrative simulated marker — not live GPS',
-      icon: operationsMapIcon('V', 'vehicle'),
-      zIndexOffset: 500
-    }).addTo(map).bindPopup('<strong>Illustrative demo marker</strong><br>This is not a live or measured vehicle location.');
     map.fitBounds(bounds, { padding: [35, 35], maxZoom: 13 });
     if (window.ResizeObserver) {
       operationsMapResizeObserver = new ResizeObserver(() => {
@@ -661,12 +652,12 @@
     tiles.once('tileload', () => {
       if (operationsMap !== map) return;
       clearTimeout(operationsMapTileTimer);
-      setOperationsMapStatus('OpenStreetMap loaded · pathway is illustrative, not a road route or live GPS track.', false);
+      setOperationsMapStatus('OpenStreetMap loaded · straight-line preview only · GPS tracking is off.', false);
     });
     tiles.once('tileerror', () => {
-      if (operationsMap === map) setOperationsMapStatus('Map tiles are unavailable. The pickup list remains available; no live GPS feed is connected.', true);
+      if (operationsMap === map) setOperationsMapStatus('Map tiles are unavailable. The pickup list remains available; GPS tracking remains off.', true);
     });
-    setOperationsMapStatus('OpenStreetMap · straight-line demo pathway · no live GPS feed connected.', false);
+    setOperationsMapStatus('OpenStreetMap · straight-line preview only · GPS tracking is off.', false);
     operationsMapTileTimer = setTimeout(() => {
       if (operationsMap === map) setOperationsMapStatus('Map tiles are taking too long to load. The pickup list remains available.', true);
     }, 12000);
@@ -800,7 +791,7 @@
     const current = roles[role];
     const content = role === 'operations' ? ({ overview: operationsOverview, enquiries: enquiriesView, collections: collectionsView, facility: facilityView, processing: processingView, inventory: inventoryView, shipments: shipmentsView, alerts: alertsView, reports: reportsView }[view] || operationsOverview)() : role === 'vendor' ? vendorView() : startupView();
     const unread = state().alerts.filter(x => x.status !== 'Resolved').length;
-    app.innerHTML = `<div class="workspace"><aside class="sidebar"><a href="#" class="sidebar-brand" data-action="home">${icon}<span><strong>FLORAL<br>CIRCULAR</strong><small>DEMO CONTROL TOWER</small></span></a><div class="sidebar-org"><span class="org-avatar">${current.initials}</span><div><strong>${current.title}</strong><small>${current.tagline}</small></div><span class="org-chevron">⌄</span></div><nav class="side-nav" aria-label="Workspace navigation"><span class="nav-caption">WORKSPACE</span>${current.views.map(([key, label]) => `<button class="side-link ${view === key ? 'active' : ''}" data-view="${key}"><span class="side-glyph">${navGlyph(key)}</span>${label}${key === 'alerts' && unread ? `<i class="nav-count">${unread}</i>` : key === 'enquiries' && state().enquiries.filter(item => item.status === 'New').length ? `<i class="nav-count">${state().enquiries.filter(item => item.status === 'New').length}</i>` : ''}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="demo-status"><span></span><div><b>DEMO ENVIRONMENT</b><small>Local browser data</small></div></div><button class="side-link" data-action="reset-demo"><span class="side-glyph">↻</span>Reset demo data</button><button class="side-link" data-action="logout"><span class="side-glyph">↗</span>Return to public site</button><div class="sidebar-foot">Floral Circular · Prototype<br>Not for operational use</div></div></aside><div class="workspace-main"><header class="topbar"><button class="icon-button sidebar-toggle" aria-label="Toggle navigation" data-action="sidebar-toggle">☰</button><div class="breadcrumb"><span>Floral Circular</span><b>/</b><strong>${esc(current.views.find(x => x[0] === view)?.[1] || 'Overview')}</strong></div><div class="topbar-right"><span class="top-date">Jammu <b>·</b> Demo dataset</span><button class="icon-button notification-button" aria-label="Open alerts" title="Open alerts" data-view="alerts">♧${unread ? `<i>${unread}</i>` : ''}</button><button class="profile-chip" data-action="switch-role"><span>${current.initials}</span><span class="profile-label">${current.title}<small>Demo role · not authenticated</small></span><b>⌄</b></button></div></header><main class="workspace-content"><div class="demo-banner"><span>DEMO</span><p>Fictional sample records are stored in this browser only. This role switch is not a secure login.</p><button data-action="about-demo" aria-label="About demo data">ⓘ</button></div><div class="view-content">${content}</div><footer class="workspace-footer">Demo preview · No live GPS, external messaging or production records connected <a href="#" data-action="about-demo">About this demo</a></footer></main></div></div>`;
+    app.innerHTML = `<div class="workspace"><aside class="sidebar"><a href="#" class="sidebar-brand" data-action="home">${icon}<span><strong>FLORAL<br>CIRCULAR</strong><small>DEMO CONTROL TOWER</small></span></a><div class="sidebar-org"><span class="org-avatar">${current.initials}</span><div><strong>${current.title}</strong><small>${current.tagline}</small></div><span class="org-chevron">⌄</span></div><nav class="side-nav" aria-label="Workspace navigation"><span class="nav-caption">WORKSPACE</span>${current.views.map(([key, label]) => `<button class="side-link ${view === key ? 'active' : ''}" data-view="${key}"><span class="side-glyph">${navGlyph(key)}</span>${label}${key === 'alerts' && unread ? `<i class="nav-count">${unread}</i>` : key === 'enquiries' && state().enquiries.filter(item => item.status === 'New').length ? `<i class="nav-count">${state().enquiries.filter(item => item.status === 'New').length}</i>` : ''}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="demo-status"><span></span><div><b>DEMO ENVIRONMENT</b><small>Local browser data</small></div></div><button class="side-link" data-action="reset-demo"><span class="side-glyph">↻</span>Reset demo data</button><button class="side-link" data-action="logout"><span class="side-glyph">↗</span>Return to public site</button><div class="sidebar-foot">Floral Circular · Prototype<br>Not for operational use</div></div></aside><div class="workspace-main"><header class="topbar"><button class="icon-button sidebar-toggle" aria-label="Toggle navigation" data-action="sidebar-toggle">☰</button><div class="breadcrumb"><span>Floral Circular</span><b>/</b><strong>${esc(current.views.find(x => x[0] === view)?.[1] || 'Overview')}</strong></div><div class="topbar-right"><span class="top-date">Jammu <b>·</b> Demo dataset</span><button class="icon-button notification-button" aria-label="Open alerts" title="Open alerts" data-view="alerts">♧${unread ? `<i>${unread}</i>` : ''}</button><button class="icon-button workspace-home" aria-label="Return to public site" title="Return to public site" data-action="logout">↗</button><button class="profile-chip" data-action="switch-role"><span>${current.initials}</span><span class="profile-label">${current.title}<small>Demo role · not authenticated</small></span><b>⌄</b></button></div></header><main class="workspace-content"><div class="demo-banner"><span>DEMO</span><p>Fictional sample records are stored in this browser only. This role switch is not a secure login.</p><button data-action="about-demo" aria-label="About demo data">ⓘ</button></div><div class="view-content">${content}</div><footer class="workspace-footer">Demo preview · No live GPS, external messaging or production records connected <a href="#" data-action="about-demo">About this demo</a></footer></main></div></div>`;
   }
 
   function navGlyph(key) {
