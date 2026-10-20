@@ -190,179 +190,179 @@
         <section class="contact-section" id="contact"><div class="section-wrap contact-grid contact-grid-enquiry"><div><span class="mini-label">WORK WITH THE NETWORK</span><h2>Contribute floral waste<br>or submit an enquiry.</h2><p>Flower shops, temples, individuals and organisations can tell us about floral waste donations or sales, regular collection, partnerships, or another enquiry.</p><p>Share your contact details and, where relevant, the material, estimated quantity, location and collection frequency.</p></div><div class="contact-action"><form class="public-enquiry-form" data-form="contact" aria-describedby="enquiry-storage-notice enquiry-feedback"><h3>Contribution enquiry</h3><p class="enquiry-form-intro">Fields marked <i>*</i> are required.</p><div class="public-enquiry-fields"><label class="form-field"><span>Full name <i>*</i></span><input name="fullName" type="text" required minlength="2" maxlength="100" autocomplete="name" placeholder="Your full name"></label><label class="form-field"><span>Mobile number <i>*</i></span><input name="mobile" type="tel" required inputmode="tel" autocomplete="tel" maxlength="20" pattern="\\+?[0-9\\s\\(\\)\\.\\-]{7,20}" placeholder="+91 98765 43210"></label><label class="form-field"><span>Email address <i>*</i></span><input name="email" type="email" required maxlength="254" autocomplete="email" placeholder="you@example.in"></label><label class="form-field"><span>Organization / shop name</span><input name="organization" type="text" maxlength="120" autocomplete="organization" placeholder="Optional"></label><label class="form-field"><span>Stakeholder type <i>*</i></span><select name="stakeholderType" required><option value="">Choose one</option><option>Flower shopkeeper</option><option>Temple</option><option>Individual</option><option>Organization</option><option>Other</option></select></label><label class="form-field"><span>Purpose of enquiry <i>*</i></span><select name="purpose" required><option value="">Choose one</option><option>Donate floral waste</option><option>Sell floral waste</option><option>Arrange regular collection</option>        <option>Partner with Pushp Dhara</option><option>General enquiry</option></select></label><label class="form-field form-field-wide"><span>Floral waste details</span><textarea name="floralDetails" rows="3" maxlength="1000" placeholder="Optional: flower types, estimated quantity, location, collection frequency, handling needs"></textarea><small class="field-hint">Share only what is relevant; up to 1,000 characters.</small></label><label class="form-field form-field-wide"><span>Additional message</span><textarea name="message" rows="3" maxlength="2000" placeholder="Anything else you would like us to know?"></textarea></label></div><p class="enquiry-storage-notice" id="enquiry-storage-notice"><strong>Demonstration only:</strong> This site has no backend or secure database. Do not enter real personal or confidential information; submissions are stored only in this browser and are not shared with an operations team.</p><p class="enquiry-feedback" id="enquiry-feedback" role="status" aria-live="polite"></p><button class="button button-primary enquiry-submit" type="submit">Submit enquiry</button></form></div></div></section>
       </main>
       <footer class="public-footer"><a class="brand-lockup" href="#home">${icon}<span><strong>PUSHP DHARA</strong><small>FROM OFFERING TO OPPORTUNITY</small></span></a><span>Coordination for a more accountable circular supply chain.</span><div><a href="#about">About</a><a href="#process">Process</a><a href="#faq">FAQ</a><a href="#privacy">Privacy</a><a href="#terms">Terms</a><button data-action="login">Portal login</button><a href="#contact">Contact</a></div><small class="footer-note">Demo interface · Sample data is fictional · Policies require local legal review</small></footer>`;
-          initializePlanningMap();
-          updatePlanningExperience();
+            initializePlanningMap();
+            updatePlanningExperience();
         }
 
         function setPlanningMapStatus(state, message) {
-          const status = document.getElementById('planning-map-status');
-          if (!status) return;
-          status.dataset.state = state;
-          status.textContent = message;
+            const status = document.getElementById('planning-map-status');
+            if (!status) return;
+            status.dataset.state = state;
+            status.textContent = message;
         }
 
         function destroyPlanningMap() {
-          clearTimeout(planningTileTimer);
-          if (planningResizeObserver) planningResizeObserver.disconnect();
-          if (planningResizeHandler) window.removeEventListener('resize', planningResizeHandler);
-          planningResizeObserver = null;
-          planningResizeHandler = null;
-          planningSpiderLayers.forEach(layer => layer.remove());
-          if (planningMap) planningMap.remove();
-          planningMap = null;
-          planningMarkers = new Map();
-          planningSpiderLayers = [];
-          activePlanningPopup = null;
+            clearTimeout(planningTileTimer);
+            if (planningResizeObserver) planningResizeObserver.disconnect();
+            if (planningResizeHandler) window.removeEventListener('resize', planningResizeHandler);
+            planningResizeObserver = null;
+            planningResizeHandler = null;
+            planningSpiderLayers.forEach(layer => layer.remove());
+            if (planningMap) planningMap.remove();
+            planningMap = null;
+            planningMarkers = new Map();
+            planningSpiderLayers = [];
+            activePlanningPopup = null;
         }
 
         function categoryLabel(category) {
-          return ({ temple: 'Temple / collection point', partner: 'Potential processing partner or initiative', site: 'Proposed processing site' })[category];
+            return ({ temple: 'Temple / collection point', partner: 'Potential processing partner or initiative', site: 'Proposed processing site' })[category];
         }
 
         function locationDirectionUrl(location) {
-          return `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
+            return `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
         }
 
         function locationPopup(location) {
-          const templePlan = location.templeId ? planning.getPlan(location.templeId, planningDay) : null;
-          const estimate = templePlan
-            ? `<p>Estimated ${planningDayLabels[planningDay].toLowerCase()} waste: <strong>${formatPlanningKg(templePlan.wasteKgPerDay)}</strong> · planned bins: <strong>${templePlan.plannedBins}</strong></p>`
-            : '';
-          return `<div class="planning-popup"><strong>${esc(location.name)}</strong><small>${esc(categoryLabel(location.category))}</small><p>${esc(location.role)}</p>${estimate}<small>${location.lat}, ${location.lng}</small><a href="${locationDirectionUrl(location)}" target="_blank" rel="noopener noreferrer">Directions ↗</a></div>`;
+            const templePlan = location.templeId ? planning.getPlan(location.templeId, planningDay) : null;
+            const estimate = templePlan ?
+                `<p>Estimated ${planningDayLabels[planningDay].toLowerCase()} waste: <strong>${formatPlanningKg(templePlan.wasteKgPerDay)}</strong> · planned bins: <strong>${templePlan.plannedBins}</strong></p>` :
+                '';
+            return `<div class="planning-popup"><strong>${esc(location.name)}</strong><small>${esc(categoryLabel(location.category))}</small><p>${esc(location.role)}</p>${estimate}<small>${location.lat}, ${location.lng}</small><a href="${locationDirectionUrl(location)}" target="_blank" rel="noopener noreferrer">Directions ↗</a></div>`;
         }
 
         function initializePlanningMap() {
-          const mapElement = document.getElementById('network-map');
-          if (!mapElement) return;
-          if (!window.L) {
-            setPlanningMapStatus('error', 'The map library is unavailable. The searchable location list and planning data remain usable.');
-            return;
-          }
-          destroyPlanningMap();
-          try {
-            const map = window.L.map(mapElement, { scrollWheelZoom: true });
-            planningMap = map;
-            const tileLayer = window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-              maxZoom: 19,
-              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-            }).addTo(map);
-
-            planning.locations.forEach(location => {
-              const marker = window.L.marker([location.lat, location.lng], {
-                title: location.name,
-                icon: planningMarkerIcon(location)
-              });
-              marker.on('click', () => selectPlanningLocation(location.id, true));
-              planningMarkers.set(location.id, marker);
-            });
-
-            const bounds = window.L.latLngBounds(planning.locations.map(location => [location.lat, location.lng]));
-            map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14 });
-            map.on('zoomend moveend', refreshPlanningMarkers);
-            refreshPlanningMarkers();
-            setPlanningMapStatus('loading', 'Loading OpenStreetMap tiles…');
-            planningTileTimer = setTimeout(() => {
-              if (planningMap === map) setPlanningMapStatus('error', 'Map tiles are not loading. Check your internet connection; the location list and bin plan remain usable.');
-            }, 12000);
-            tileLayer.once('tileload', () => {
-              if (planningMap !== map) return;
-              clearTimeout(planningTileTimer);
-              setPlanningMapStatus('ready', 'OpenStreetMap is ready · all locations plotted.');
-            });
-            tileLayer.once('tileerror', () => {
-              if (planningMap === map) setPlanningMapStatus('error', 'Some map tiles could not load. Check your connection; locations remain available in the list.');
-            });
-            if (window.ResizeObserver) {
-              planningResizeObserver = new ResizeObserver(() => {
-                if (planningMap !== map) return;
-                map.invalidateSize({ pan: false });
-                map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: false });
-              });
-              planningResizeObserver.observe(mapElement);
+            const mapElement = document.getElementById('network-map');
+            if (!mapElement) return;
+            if (!window.L) {
+                setPlanningMapStatus('error', 'The map library is unavailable. The searchable location list and planning data remain usable.');
+                return;
             }
-            planningResizeHandler = () => {
-              if (planningMap !== map) return;
-              map.invalidateSize({ pan: false });
-              map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: false });
-            };
-            window.addEventListener('resize', planningResizeHandler);
-            setTimeout(() => {
-              if (planningMap !== map) return;
-              map.invalidateSize({ pan: false });
-              map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: false });
-            }, 0);
-          } catch (error) {
             destroyPlanningMap();
-            console.error('Unable to initialize the planning map.', error);
-            setPlanningMapStatus('error', `The map could not be initialized (${error.message}). The location list and planning data remain usable.`);
-          }
+            try {
+                const map = window.L.map(mapElement, { scrollWheelZoom: true });
+                planningMap = map;
+                const tileLayer = window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+                }).addTo(map);
+
+                planning.locations.forEach(location => {
+                    const marker = window.L.marker([location.lat, location.lng], {
+                        title: location.name,
+                        icon: planningMarkerIcon(location)
+                    });
+                    marker.on('click', () => selectPlanningLocation(location.id, true));
+                    planningMarkers.set(location.id, marker);
+                });
+
+                const bounds = window.L.latLngBounds(planning.locations.map(location => [location.lat, location.lng]));
+                map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14 });
+                map.on('zoomend moveend', refreshPlanningMarkers);
+                refreshPlanningMarkers();
+                setPlanningMapStatus('loading', 'Loading OpenStreetMap tiles…');
+                planningTileTimer = setTimeout(() => {
+                    if (planningMap === map) setPlanningMapStatus('error', 'Map tiles are not loading. Check your internet connection; the location list and bin plan remain usable.');
+                }, 12000);
+                tileLayer.once('tileload', () => {
+                    if (planningMap !== map) return;
+                    clearTimeout(planningTileTimer);
+                    setPlanningMapStatus('ready', 'OpenStreetMap is ready · all locations plotted.');
+                });
+                tileLayer.once('tileerror', () => {
+                    if (planningMap === map) setPlanningMapStatus('error', 'Some map tiles could not load. Check your connection; locations remain available in the list.');
+                });
+                if (window.ResizeObserver) {
+                    planningResizeObserver = new ResizeObserver(() => {
+                        if (planningMap !== map) return;
+                        map.invalidateSize({ pan: false });
+                        map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: false });
+                    });
+                    planningResizeObserver.observe(mapElement);
+                }
+                planningResizeHandler = () => {
+                    if (planningMap !== map) return;
+                    map.invalidateSize({ pan: false });
+                    map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: false });
+                };
+                window.addEventListener('resize', planningResizeHandler);
+                setTimeout(() => {
+                    if (planningMap !== map) return;
+                    map.invalidateSize({ pan: false });
+                    map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: false });
+                }, 0);
+            } catch (error) {
+                destroyPlanningMap();
+                console.error('Unable to initialize the planning map.', error);
+                setPlanningMapStatus('error', `The map could not be initialized (${error.message}). The location list and planning data remain usable.`);
+            }
         }
 
         function planningMarkerIcon(location) {
-          const selected = location.id === selectedLocationId;
-          const symbol = ({ temple: 'T', partner: 'P', site: 'S' })[location.category];
-          return window.L.divIcon({
-            className: `planning-marker-container${selected ? ' planning-marker-selected' : ''}`,
-            html: `<span class="planning-marker planning-marker-${location.category}" aria-hidden="true">${symbol}</span>`,
-            iconSize: [22, 22],
-            iconAnchor: [11, 11],
-            popupAnchor: [0, -12]
-          });
+            const selected = location.id === selectedLocationId;
+            const symbol = ({ temple: 'T', partner: 'P', site: 'S' })[location.category];
+            return window.L.divIcon({
+                className: `planning-marker-container${selected ? ' planning-marker-selected' : ''}`,
+                html: `<span class="planning-marker planning-marker-${location.category}" aria-hidden="true">${symbol}</span>`,
+                iconSize: [22, 22],
+                iconAnchor: [11, 11],
+                popupAnchor: [0, -12]
+            });
         }
 
         function formatPlanningKg(value) {
-          return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 3 }) + ' kg';
+            return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 3 }) + ' kg';
         }
 
         function formatPlanningNumber(value) {
-          return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 1 });
+            return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 1 });
         }
 
         function formatPlanningRate(value) {
-          return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 3 });
+            return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 3 });
         }
 
         function formatPlanningHours(value) {
-          if (!Number.isFinite(value)) return '—';
-          return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 1 }) + ' h';
+            if (!Number.isFinite(value)) return '—';
+            return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 1 }) + ' h';
         }
 
         function formatPickupTime(value) {
-          const [hours, minutes] = value.split(':').map(Number);
-          const suffix = hours >= 12 ? 'PM' : 'AM';
-          return `${hours % 12 || 12}:${String(minutes).padStart(2, '0')} ${suffix}`;
+            const [hours, minutes] = value.split(':').map(Number);
+            const suffix = hours >= 12 ? 'PM' : 'AM';
+            return `${hours % 12 || 12}:${String(minutes).padStart(2, '0')} ${suffix}`;
         }
 
         function getVisibleCategories() {
-          return new Set(Array.from(document.querySelectorAll('.category-filter:checked'), input => input.value));
+            return new Set(Array.from(document.querySelectorAll('.category-filter:checked'), input => input.value));
         }
 
         function renderLocationList() {
-          const list = document.getElementById('location-list');
-          if (!list) return;
-          const query = (document.getElementById('location-search')?.value || '').trim().toLocaleLowerCase();
-          const visibleCategories = getVisibleCategories();
-          const filtered = planning.locations.filter(location =>
-            visibleCategories.has(location.category) &&
-            `${location.name} ${categoryLabel(location.category)} ${location.role}`.toLocaleLowerCase().includes(query)
-          );
-          document.getElementById('location-count').textContent = `(${filtered.length})`;
-          list.innerHTML = filtered.length
-            ? filtered.map(location => `<button type="button" role="listitem" class="location-list-item${selectedLocationId === location.id ? ' is-selected' : ''}" data-action="select-planning-location" data-id="${esc(location.id)}" aria-pressed="${selectedLocationId === location.id}"><span class="map-key map-key-${location.category}">${({ temple: 'T', partner: 'P', site: 'S' })[location.category]}</span><span><strong>${esc(location.name)}</strong><small>${esc(categoryLabel(location.category))}</small></span><span aria-hidden="true">›</span></button>`).join('')
-            : '<p class="location-empty">No locations match these filters.</p>';
+            const list = document.getElementById('location-list');
+            if (!list) return;
+            const query = (document.getElementById('location-search') ? .value || '').trim().toLocaleLowerCase();
+            const visibleCategories = getVisibleCategories();
+            const filtered = planning.locations.filter(location =>
+                visibleCategories.has(location.category) &&
+                `${location.name} ${categoryLabel(location.category)} ${location.role}`.toLocaleLowerCase().includes(query)
+            );
+            document.getElementById('location-count').textContent = `(${filtered.length})`;
+            list.innerHTML = filtered.length ?
+                filtered.map(location => `<button type="button" role="listitem" class="location-list-item${selectedLocationId === location.id ? ' is-selected' : ''}" data-action="select-planning-location" data-id="${esc(location.id)}" aria-pressed="${selectedLocationId === location.id}"><span class="map-key map-key-${location.category}">${({ temple: 'T', partner: 'P', site: 'S' })[location.category]}</span><span><strong>${esc(location.name)}</strong><small>${esc(categoryLabel(location.category))}</small></span><span aria-hidden="true">›</span></button>`).join('') :
+                '<p class="location-empty">No locations match these filters.</p>';
         }
 
         function updateLocationDetails() {
-          const panel = document.getElementById('selected-location-detail');
-          if (!panel) return;
-          const location = planning.locations.find(item => item.id === selectedLocationId);
-          if (!location) {
-            panel.innerHTML = '<p>Select a location to view its role and details.</p>';
-            return;
-          }
-          const plan = location.templeId ? planning.getPlan(location.templeId, planningDay) : null;
-          const planningDetails = plan
-            ? `<div class="location-plan-summary"><strong>${esc(planningDayLabels[planningDay])} estimate</strong><span>${formatPlanningKg(plan.wasteKgPerDay)} · ${plan.plannedBins} planned bin${plan.plannedBins === 1 ? '' : 's'}</span><small>${plan.permanentBins} permanent${plan.temporaryFestivalBins ? ` + ${plan.temporaryFestivalBins} temporary festival` : ''} · pickup ${formatPickupTime(planning.parameters.morningPickup)} and ${formatPickupTime(planning.parameters.eveningPickup)}</small></div>`
+            const panel = document.getElementById('selected-location-detail');
+            if (!panel) return;
+            const location = planning.locations.find(item => item.id === selectedLocationId);
+            if (!location) {
+                panel.innerHTML = '<p>Select a location to view its role and details.</p>';
+                return;
+            }
+            const plan = location.templeId ? planning.getPlan(location.templeId, planningDay) : null;
+            const planningDetails = plan ?
+                `<div class="location-plan-summary"><strong>${esc(planningDayLabels[planningDay])} estimate</strong><span>${formatPlanningKg(plan.wasteKgPerDay)} · ${plan.plannedBins} planned bin${plan.plannedBins === 1 ? '' : 's'}</span><small>${plan.permanentBins} permanent${plan.temporaryFestivalBins ? ` + ${plan.temporaryFestivalBins} temporary festival` : ''} · pickup ${formatPickupTime(planning.parameters.morningPickup)} and ${formatPickupTime(planning.parameters.eveningPickup)}</small></div>`
             : '<p class="no-location-plan">No bin counts, footfall estimates or pickup schedule are assigned to this location.</p>';
           panel.innerHTML = `<span class="mini-label">${esc(categoryLabel(location.category))}</span><h4>${esc(location.name)}</h4><p>${esc(location.role)}</p><small class="location-coordinates">${location.lat}, ${location.lng}</small>${planningDetails}<a href="${locationDirectionUrl(location)}" target="_blank" rel="noopener noreferrer">Directions to this point ↗</a>`;
         }
@@ -862,7 +862,7 @@
     }
     if (action === 'new-shipment') {
       const eligible = s.batches.filter(x => x.status === 'Available' && x.usableKg > x.reservedKg);
-      return openDialog('Create partner shipment', 'Only approved available stock can be reserved. Partner acceptance is a separate step.', `${selectField('Approved batch', 'batchId', eligible.map(x => [x.id, x.id + ' · ' + x.material + ' · available ' + kg(x.usableKg - x.reservedKg)]))}${selectField('Startup partner', 'startup', [['Startup partner 01 (demo)', 'Startup partner 01 (demo)']])}${field('Quantity (kg)', 'quantityKg', 'number', true, 'Within available stock')}${field('Delivery date', 'date', 'date', true, '', today())}${selectField('Assigned vendor', 'vendor', [['North Route Services (demo)', 'North Route Services (demo)'], ['City Loop Logistics (demo)', 'City Loop Logistics (demo)']])}${field('Destination', 'destination', 'text', true, 'Delivery location · demo')}`, 'Reserve & assign', action);
+      return openDialog('Prepare partner pickup', 'Reserve only quality-approved stock. The startup partner collects the material from the facility and confirms the quantity.', `${selectField('Approved batch', 'batchId', eligible.map(x => [x.id, x.id + ' · ' + x.material + ' · available ' + kg(x.usableKg - x.reservedKg)]))}${selectField('Startup partner', 'startup', [['Startup partner 01 (demo)', 'Startup partner 01 (demo)']])}${field('Quantity (kg)', 'quantityKg', 'number', true, 'Within available stock')}${field('Pickup date', 'date', 'date', true, '', today())}${field('Facility collection point', 'destination', 'text', true, 'Confirm with operations')}`, 'Reserve for pickup', action);
     }
     if (action === 'confirm-receipt') return openDialog('Confirm collected material', `Pickup ${id} · expected ${kg(s.shipments.find(x => x.id === id)?.expectedKg)}. Discrepancies create an open case.`, `${field('Actual quantity collected (kg)', 'receivedKg', 'number', true, 'Measured quantity')}${selectField('Collection outcome', 'outcome', [['Accepted', 'Collected as expected'], ['Partially Accepted', 'Partially collected'], ['Received with Quality Concerns', 'Collected with quality concerns'], ['Rejected', 'Not collected / rejected']])}${textareaField('Collection notes', 'receiptNote', 'Condition, count or quality observations', false)}`, 'Save collection record', action, id);
     if (action === 'new-feedback') return openDialog('Submit quality feedback', `Feedback for ${id} is linked to the shipment and source batch.`, `${selectField('Overall usability', 'rating', [['5', '5 · Excellent'], ['4', '4 · Good'], ['3', '3 · Acceptable'], ['2', '2 · Poor'], ['1', '1 · Unusable']])}${textareaField('Quality observations', 'comments', 'Freshness, moisture, contamination, composition, packaging and usability')}`, 'Submit feedback', action, id);
