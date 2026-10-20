@@ -340,7 +340,7 @@
         function renderLocationList() {
             const list = document.getElementById('location-list');
             if (!list) return;
-            const query = (document.getElementById('location-search') ? .value || '').trim().toLocaleLowerCase();
+            const query = (document.getElementById('location-search')?.value || '').trim().toLocaleLowerCase();
             const visibleCategories = getVisibleCategories();
             const filtered = planning.locations.filter(location =>
                 visibleCategories.has(location.category) &&
